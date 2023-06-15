@@ -27,6 +27,8 @@ Parses plain-English strings representing date/time ranges
 
 my %bod = (hour =>  0, minute =>  0, second =>  0);
 my %eod = (hour => 23, minute => 59, second => 59);
+my %boy = (month => 1, day => 1, %bod);
+my %eoy = (month => 12, day=> 31, %eod);
 
 my %weekday = (
     sunday    => 0,
@@ -389,8 +391,8 @@ sub parse_range
     }
     elsif ($string =~ /^(?:this|current) year$/)
     {
-        $beg = $self->_datetime_class()->new(year => $self->_now()->year, month => 1, day => 1, %bod);
-        $end = $self->_datetime_class()->new(year => $self->_now()->year, month => 12, day => 31, %eod);
+        $beg = $self->_datetime_class()->new(year => $self->_now()->year, %boy);
+        $end = $self->_datetime_class()->new(year => $self->_now()->year, %eoy);
     }
     elsif ($string =~ /^this ($weekday)$/)
     {
@@ -463,7 +465,7 @@ sub parse_range
             $ct *= 3;
         }
         $beg = $self->_bod()->subtract($unit => $ct);
-        $end = $beg->clone->set(hour => 23, minute => 59, second => 59);
+        $end = $beg->clone->set(%eod);
      }
     elsif ($string =~ /^past (\d+) ($weekday)s?$/)
     {
@@ -479,7 +481,7 @@ sub parse_range
     elsif ($string =~ /^yesterday$/)
     {
         $beg = $self->_bod()->subtract("days" => 1);
-        $end = $beg->clone->set(hour => 23, minute => 59, second => 59);
+        $end = $beg->clone->set(%eod);
     }
     elsif ($string =~ /^(?:last|previous) week$/)
     {
@@ -703,7 +705,7 @@ sub parse_range
         ($beg) = $self->parse_range($string);
         # Merriam-Webster defines since as "from a definite past time until now",
         # thus $end is the end of the day today and not infinity.
-        $end = $self->_now()->clone->set(hour => 23, minute => 59, second => 59);
+        $end = $self->_now()->clone->set(%eod);
     }
 
     # See if this is a range between two other dates separated by -
@@ -718,7 +720,7 @@ sub parse_range
     elsif ($beg = $self->_parse_date_manip($string))
     {
         $beg = $beg->set(%bod);
-        $end = $beg->clone->set(hour => 23, minute => 59, second => 59);
+        $end = $beg->clone->set(%eod);
     }
 
     else
@@ -738,7 +740,7 @@ sub _bod {
 sub _eod {
     my $self = shift;
     my $now = $self->_now();
-    return $now->set(hour => 23, minute => 59, second => 59);
+    return $now->set(%eod);
 }
 
 sub _now {

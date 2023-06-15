@@ -501,13 +501,13 @@ for my $test (@tests)
 
         # strftime makes no sense on infinite times
         if ( $beg->is_infinite ) {
-            cmp_ok( "$beg", 'eq', $test->{beg}, "Beginning date ok for $test->{date_range_string}");
+            cmp_ok( lc "$beg", 'eq', lc $test->{beg}, "Beginning date ok for $test->{date_range_string}");
         }
         else {
             cmp_ok($beg->strftime("%m/%d/%Y %I:%M%p"), 'eq', $test->{beg}, "Beginning date ok for $test->{date_range_string}");
         }
         if ( $end->is_infinite ) {
-            cmp_ok( "$end", 'eq', $test->{end}, "Beginning date ok for $test->{date_range_string}");
+            cmp_ok( lc "$end", 'eq', lc $test->{end}, "Beginning date ok for $test->{date_range_string}");
         }
         else {
             cmp_ok($end->strftime("%m/%d/%Y %I:%M%p"), 'eq', $test->{end}, "Ending date ok for $test->{date_range_string}");
