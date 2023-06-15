@@ -59,6 +59,22 @@ my %ordinal = (
     qr/\btwenty-?seventh\b/ => "27th", qr/\btwenty-?eighth\b/   => "28th",
     qr/\btwenty-?ninth\b/   => "29th", qr/\bthirtieth\b/        => "30th",
     qr/\bthirty-?first\b/   => "31st",
+    qr/\bone\b/             => "1",    qr/\btwo\b/              => "2",
+    qr/\bthree\b/           => "3",    qr/\bfour\b/             => "4",
+    qr/\bfive\b/            => "5",    qr/\bsix\b/              => "6",
+    qr/\bseven\b/           => "7",    qr/\beight\b/            => "8",
+    qr/\bnine\b/            => "9",    qr/\bten\b/              => "10",
+    qr/\beleven\b/          => "11",   qr/\btwelve\b/           => "12",
+    qr/\bthirteen\b/        => "13",   qr/\bfourteen\b/         => "14",
+    qr/\bfifteen\b/         => "15",   qr/\bsixteen\b/          => "16",
+    qr/\bseventeen\b/       => "17",   qr/\beighteen\b/         => "18",
+    qr/\bnineteen\b/        => "19",   qr/\btwenty\b/           => "20",
+    qr/\btwenty-one\b/      => "21",   qr/\btwenty-two\b/       => "22",
+    qr/\btwenty-three\b/    => "23",   qr/\btwenty-four\b/      => "24",
+    qr/\btwenty-five\b/     => "25",   qr/\btwenty-six\b/       => "26",
+    qr/\btwenty-seven\b/    => "27",   qr/\btwenty-eight\b/     => "28",
+    qr/\btwenty-nine\b/     => "29",   qr/\bthirty\b/           => "30",
+    qr/\bthirty-one\b/      => "31",
 );
 
 my %month = (
@@ -302,12 +318,12 @@ Also, when parsing:
 
 =item *
 
-The word "the" will always be ignored and can appear anywhere.
+The words "the" and "and" will always be ignored and can appear anywhere.
 
 =item *
 
 Cardinal numbers may be spelled out as words, i.e. "September first" instead of
-"September 1st".
+"September 1st". Similarly, "two weeks ago" and "2 weeks ago" will be treated as the same
 
 =item * 
 
@@ -330,9 +346,22 @@ sub parse_range
     my ($beg, $end, $y, $m, $d);
 
     $string = lc $string;
+
+    # The words "the" and "and" may be used with ridiculous impunity
+    $string =~ s/\bthe\b//g;
+    $string =~ s/\band\b//g;
+
     $string =~ s/^\s+//g;
     $string =~ s/\s+$//g;
     $string =~ s/\s+/ /g;
+
+    # We address the ordinals (let's not get silly, though).  If we wanted
+    # to get silly, we'd use Lingua::EN::Words2Nums, which would horribly
+    # complicate the general parsing
+    while (my ($str, $num) = each %ordinal)
+    {
+        $string =~ s/$str/$num/g;
+    }
 
     # Special cases, except in even more special cases
     unless ($string =~ /\d+ (quarter|day|week|month|year)/)
@@ -346,23 +375,6 @@ sub parse_range
             $string = "next $string";
         }
     }
-
-    # We address the ordinals (let's not get silly, though).  If we wanted
-    # to get silly, we'd use Lingua::EN::Words2Nums, which would horribly
-    # complicate the general parsing
-    while (my ($str, $num) = each %ordinal)
-    {
-        $string =~ s/$str/$num/g;
-    }
-
-    # The word "the" may be used with ridiculous impunity
-    $string =~ s/\bthe\b//g;
-
-    # Yes, again.
-    $string =~ s/^\s+//g;
-    $string =~ s/\s+$//g;
-
-    $string =~ s/\s+/ /g;
 
     # "This thing" and "current thing"
     if ($string eq "today" || $string =~ /^(?:this|current) day$/)

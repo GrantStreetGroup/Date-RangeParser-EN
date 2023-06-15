@@ -40,8 +40,20 @@ my @tests = (
         beg           => '11/01/2007 12:00AM',
         end           => '01/31/2008 11:59PM',
     }, {
+        description       => 'last three months (includes current month)',
+        date_range_string => 'last three months',
+        as_of         => '2008-01-15',
+        beg           => '11/01/2007 12:00AM',
+        end           => '01/31/2008 11:59PM',
+    }, {
         description       => 'next 3 weeks from a Sunday',
         date_range_string => 'next 3 weeks',
+        as_of         => '2012-12-09',
+        beg           => '12/16/2012 12:00AM',
+        end           => '01/05/2013 11:59PM',
+    }, {
+        description       => 'next three weeks from a Sunday',
+        date_range_string => 'next three weeks',
         as_of         => '2012-12-09',
         beg           => '12/16/2012 12:00AM',
         end           => '01/05/2013 11:59PM',
@@ -70,8 +82,20 @@ my @tests = (
         beg           => '07/27/2008 12:00AM',
         end           => '08/16/2008 11:59PM',
     }, {
+        description       => 'last three weeks (includes current week)',
+        date_range_string => 'last three weeks',
+        as_of         => '2008-08-10', # sunday
+        beg           => '07/27/2008 12:00AM',
+        end           => '08/16/2008 11:59PM',
+    }, {
         description       => 'last 8 weeks (includes current week)',
         date_range_string => 'last 8 weeks',
+        as_of         => '2008-08-16', # saturday
+        beg           => '06/22/2008 12:00AM',
+        end           => '08/16/2008 11:59PM',
+    }, {
+        description       => 'last eight weeks (includes current week)',
+        date_range_string => 'last eight weeks',
         as_of         => '2008-08-16', # saturday
         beg           => '06/22/2008 12:00AM',
         end           => '08/16/2008 11:59PM',
@@ -140,7 +164,17 @@ my @tests = (
         beg           => '01/01/1994 12:00AM',
         end           => '12/31/2010 11:59PM',
     }, {
+        date_range_string => 'last seventeen years',
+        as_of         => '2010-03-31',
+        beg           => '01/01/1994 12:00AM',
+        end           => '12/31/2010 11:59PM',
+    }, {
         date_range_string => 'next 20 years',
+        as_of         => '1999-12-31',
+        beg           => '01/01/2000 12:00AM',
+        end           => '12/31/2019 11:59PM',
+    }, {
+        date_range_string => 'next twenty years',
         as_of         => '1999-12-31',
         beg           => '01/01/2000 12:00AM',
         end           => '12/31/2019 11:59PM',
