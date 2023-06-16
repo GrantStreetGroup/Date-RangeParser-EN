@@ -533,6 +533,42 @@ my @tests = (
         as_of             => '2023-06-16 15:47',
         beg               => '06/16/2023 03:00PM',
         end               => '06/16/2023 03:59PM',
+    }, {
+        # 2nd in a date
+        date_range_string => 'August 2nd 1985',
+        as_of             => '2023-06-16 15:47',
+        beg               => '08/02/1985 12:00AM',
+        end               => '08/02/1985 11:59PM',
+    }, {
+        # second in a date
+        date_range_string => 'August second 1985',
+        as_of             => '2023-06-16 15:47',
+        beg               => '08/02/1985 12:00AM',
+        end               => '08/02/1985 11:59PM',
+    }, {
+        # 2nd of this month
+        date_range_string => '2nd of this month',
+        as_of             => '2023-06-16 15:47',
+        beg               => '06/02/2023 12:00AM',
+        end               => '06/02/2023 11:59PM',
+    }, {
+        # second of this month
+        date_range_string => 'second of this month',
+        as_of             => '2023-06-16 15:47',
+        beg               => '06/02/2023 12:00AM',
+        end               => '06/02/2023 11:59PM',
+    }, {
+        # second of this month
+        date_range_string => 'second of 2 months ago',
+        as_of             => '2023-06-16 15:47',
+        beg               => '04/02/2023 12:00AM',
+        end               => '04/02/2023 11:59PM',
+    }, {
+        # second of this month
+        date_range_string => '2nd of two months ago',
+        as_of             => '2023-06-16 15:47',
+        beg               => '04/02/2023 12:00AM',
+        end               => '04/02/2023 11:59PM',
     },
 );
 

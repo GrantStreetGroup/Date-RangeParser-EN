@@ -362,6 +362,11 @@ sub parse_range
     {
         $string =~ s/$str/$num/g;
     }
+    # at this point, we may have changed the word 'second' into '2nd'
+    # when we did not mean to. So we swap back. We do this outside of
+    # the while loop above, because this function is recursive, and
+    # the following regex is anchored to the end of the string.
+    $string =~ s/2nd$/second/;
 
     # Special cases, except in even more special cases
     unless ($string =~ /\d+ (quarter|day|week|month|year)/)
