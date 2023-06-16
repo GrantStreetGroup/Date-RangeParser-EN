@@ -387,6 +387,20 @@ sub parse_range
         $beg = $self->_bod();
         $end = $self->_eod();
     }
+    elsif ($string =~ /^(?:this|current) hour$/) {
+        $beg = $self->_now()->set(minute => 0, second => 0);
+        $end = $beg->clone->set(minute => 59, second => 59);
+    }
+    elsif ($string =~ /^(?:this|current) minute$/) {
+        $beg = $self->_now()->set(second => 0);
+        $end = $beg->clone->set(second => 59);
+    }
+    elsif ($string =~ /^(?:this|current) second$/) {
+        # Relly this comes from this or current second,
+        # but our ordinals messed this up.
+        $beg = $self->_now();
+        $end = $beg->clone;
+    }
     elsif ($string =~ /^(?:this|current) week$/)
     {
         my $dow = $self->_now()->day_of_week % 7;       # Monday == 1
@@ -430,11 +444,27 @@ sub parse_range
         $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
     }
     # "Last N things" and "Past N things"
-    elsif ($string =~ /^(?:last|past) (\d+) hours?$/)
+    elsif ($string =~ /^(?:last|past) (\d+)?\s?hours?$/)
     {
         # The "+0" math avoids call-by-reference side effects
         $beg = $self->_now();
-        $beg->subtract(hours => $1 + 0);
+        $beg->subtract(hours => $1 // 1 + 0);
+
+        $end = $self->_now();
+    }
+    elsif ($string =~ /^(?:last|past) (\d+)?\s?minutes?$/)
+    {
+        # The "+0" math avoids call-by-reference side effects
+        $beg = $self->_now();
+        $beg->subtract(minutes => $1 // 1 + 0);
+
+        $end = $self->_now();
+    }
+    elsif ($string =~ /^(?:last|past) (\d+)?\s?seconds?$/)
+    {
+        # The "+0" math avoids call-by-reference side effects
+        $beg = $self->_now();
+        $beg->subtract(seconds => $1 // 1 + 0);
 
         $end = $self->_now();
     }
@@ -547,6 +577,18 @@ sub parse_range
         $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
     }
     # "Next thing" and "Next N things"
+    elsif ($string =~ /^next (\d+)?\s*seconds?$/)
+    {
+        my $c = defined $1 ? $1 : 1;
+        $beg = $self->_now();
+        $end = $beg->clone->add(seconds => $c);
+    }
+    elsif ($string =~ /^next (\d+)?\s*minutes?$/)
+    {
+        my $c = defined $1 ? $1 : 1;
+        $beg = $self->_now();
+        $end = $beg->clone->add(minutes => $c);
+    }
     elsif ($string =~ /^next (\d+)?\s*hours?$/)
     {
         my $c = defined $1 ? $1 : 1;
