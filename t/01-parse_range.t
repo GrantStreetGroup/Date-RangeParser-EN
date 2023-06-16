@@ -509,14 +509,45 @@ my @tests = (
         as_of             => '2000-01-01',
         beg               => 'inf',
         end               => '-inf',
-    }
+    }, {
+        # ISO format without the seconds
+        date_range_string => '2023-06-16 15:47 - 2023-06-24 12:00',
+        as_of             => '2023-06-16 15:47',
+        beg               => '06/16/2023 03:47PM',
+        end               => '06/24/2023 12:00PM',
+    }, {
+        # 12 hour format with noon
+        date_range_string => '2023-06-16 3pm - 2023-06-24 noon',
+        as_of             => '2023-06-16 15:47',
+        beg               => '06/16/2023 03:00PM',
+        end               => '06/24/2023 12:00PM',
+    }, {
+        # 12 hour format with noon
+        date_range_string => '2023-06-16 3pm - 2023-06-24 noon',
+        as_of             => '2023-06-16 15:47',
+        beg               => '06/16/2023 03:00PM',
+        end               => '06/24/2023 12:00PM',
+    }, {
+        # Guess minutes
+        date_range_string => '2023-06-16 3pm',
+        as_of             => '2023-06-16 15:47',
+        beg               => '06/16/2023 03:00PM',
+        end               => '06/16/2023 03:59PM',
+    },
 );
 
 for my $test (@tests)
 {
     my $as_of_date = $test->{as_of};
-       $as_of_date =~ /^(\d{4})\-(\d{2})\-(\d{2})$/ or (warn and next);
-    my ($y, $m, $d) = ($1, $2, $3);
+
+    my ($y, $m, $d, $h, $mn, $s);
+    if ($as_of_date =~ /^(\d{4})\-(\d{2})\-(\d{2}) (\d{2}):(\d{2})$/) {
+        ($y, $m, $d, $h, $mn) = ($1, $2, $3, $4, $5);
+    } elsif ($as_of_date =~ /^(\d{4})\-(\d{2})\-(\d{2})$/) {
+        ($y, $m, $d) = ($1, $2, $3);
+    } else {
+        warn "$as_of_date is not a recognized format" and next;
+    }
 
     my $parser = Date::RangeParser::EN->new(
         now_callback => sub {

@@ -729,10 +729,36 @@ sub parse_range
     }
 
     # If all else fails, see if Date::Manip can figure this out
-    elsif ($beg = $self->_parse_date_manip($string))
+    # If some component of the date or time is missing, Date::Manip
+    # will default it, generally to 00.
+    elsif (($beg, my $incomplete) = $self->_parse_date_manip($string))
     {
-        $beg = $beg->set(%bod);
-        $end = $beg->clone->set(%eod);
+        # We have dropped into date manip because the previous cases have not
+        # been triggered. Generally speaking that means we have to deal with
+        # when there is a time given in addition to a date.
+
+        $end = $beg->clone;
+        # If Date::Manip had to supply defaults for some parts,
+        # it gave the earliest possible datetime.
+        # For the end of the range, we swap those defaults with
+        # the latest possible.
+        for my $component (@$incomplete){
+            if($component eq 'day'){
+                $end->add(months => 1)->subtract(days => 1);
+            }
+            else{
+                $end->set($component => $eoy{$component});
+            }
+        }
+
+        # Dates in the MM/DD/YYYY format will have beginning and ending time
+        # of midnight; however, we want them to be the entire day; so, we set
+        # the end time to the end of the day.
+        if (  !scalar @$incomplete
+           && $beg->hms eq "00:00:00"
+           && $end->hms eq "00:00:00"  ) {
+            $end->set(%eod);
+        }
     }
 
     else
@@ -780,11 +806,20 @@ sub _infinite_past_class {
     return $self->{infinite_past_class} || 'DateTime::Infinite::Past';
 }
 
+my $abbrevs = [
+    [month => 'm'],
+    [day => 'd'],
+    [hour => 'h'],
+    [minute => 'mn'],
+    [second => 's'],
+];
+
 sub _parse_date_manip
 {
     my ($self, $val) = @_;
 
     my $date;
+    my $incomplete = [];
 
     # wrap in eval as Date::Manip fatally dies on strange input (ie. 010101)
     eval {
@@ -812,7 +847,13 @@ sub _parse_date_manip
             $dm->config("forcedate", $now->ymd . '-' . $now->hms);
             my $err = $dm->parse($val);
 
-            ($y, $m, $d, $H, $M, $S) = $dm->value unless $err;
+            if (!$err){
+                ($y, $m, $d, $H, $M, $S) = $dm->value;
+
+                for my $section (@$abbrevs){
+                    push (@$incomplete, $section->[0]) if !$dm->complete($section->[1]);
+                }
+            }
         }
 
         if ( $y )
@@ -828,7 +869,10 @@ sub _parse_date_manip
         }
     };
 
-    return $date;
+    # Our caller expects a false value on failure
+    return if !$date;
+
+    return ($date, $incomplete);
 }
 
 =head1 TO DO
