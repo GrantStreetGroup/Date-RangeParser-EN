@@ -519,15 +519,15 @@ sub parse_range
         $beg = $self->_bod()->add(days => $adjust);
         $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
     }
-    elsif ($string =~ /^past (\d+) ($weekday)s?$/)
+    elsif ($string =~ /^(?:last|past) (\d+) ($weekday)s?$/)
     {
-        # really "N weekdays ago", thanks to s/ago/.../ above
+        my $c = defined $1 ? $1 : 1;
         my $dow = $self->_now()->day_of_week % 7;          # Monday == 1
         my $adjust = $weekday{$2} - $dow;
         $adjust -= 7 if $adjust >=0;
         $adjust -= 7*($1 - 1);
-        $beg = $self->_bod()->subtract(days => abs($adjust));
-        $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
+        $end = $self->_eod()->subtract(days => abs($adjust));
+        $beg = $end->clone->subtract(days => 7*($c-1)+1)->add(seconds => 1);
     }
     # "Last thing" and "Previous thing"
     elsif ($string =~ /^yesterday$/)
