@@ -368,15 +368,6 @@ sub parse_range
     # the following regex is anchored to the end of the string.
     $string =~ s/2nd$/second/;
 
-    # Special cases, except in even more special cases
-    unless ($string =~ /\d+ (quarter|day|week|month|year)/)
-    {
-        if ($string =~ s/ (?:hence|from\s+now)$//)
-        {
-            $string = "next $string";
-        }
-    }
-
     # "This thing" and "current thing"
     if ($string eq "today" || $string =~ /^(?:this|current) day$/)
     {
@@ -518,6 +509,16 @@ sub parse_range
         $beg = $self->_bod()->subtract(days => abs($adjust));
         $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
     }
+    elsif ($string =~ /^(\d+) ($weekday)s? (?:hence|from\s+now)$/) {
+        # That's both "next sunday" and "3 sundays from now"
+        my $c = defined $1 ? $1 : 1;
+        my $dow = $self->_now()->day_of_week % 7;        # Monday == 1
+        my $adjust = $weekday{$2} - $dow;        # get to right day of week
+        $adjust += 7 if $adjust <= 0;            # add 7 days if its today or in the past
+        $adjust += 7*($c - 1);
+        $beg = $self->_bod()->add(days => $adjust);
+        $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
+    }
     elsif ($string =~ /^past (\d+) ($weekday)s?$/)
     {
         # really "N weekdays ago", thanks to s/ago/.../ above
@@ -628,6 +629,16 @@ sub parse_range
         $end = $beg->clone ->add(months => 3 * $c, end_of_month => 'preserve')
                     ->subtract(seconds => 1);
     }
+    # Add support for N quarters from now
+    elsif ($string =~ /^(\d+)?\s*quarters? (?:hence|from\s+now)$/)
+    {
+        my $c = defined $1 ? $1 : 1;
+        my $zq = int(($self->_now()->month - 1) / 3);
+        $beg = $self->_bod()->set_month($zq * 3 + 1)->set_day(1)
+                    ->add(months => 3, end_of_month => 'preserve');
+        $end = $beg->clone ->add(months => 3, end_of_month => 'preserve')
+                    ->subtract(seconds => 1);
+    }
     elsif ($string =~ /^next (\d+)?\s*years?$/)
     {
         my $c = defined $1 ? $1 : 1;
@@ -664,6 +675,19 @@ sub parse_range
         }
 
         $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
+    }
+    # Add support for N (Time) from now
+    elsif ($string =~ /^(\d+) seconds? (?:hence|from\s+now)$/) {
+        $beg = $self->_now()->add(seconds => $1);
+        $end = $beg->clone;
+    }
+    elsif ($string =~ /^(\d+) minutes? (?:hence|from\s+now)$/) {
+        $beg = $self->_now()->add(minutes => $1)->set(second => 0);
+        $end = $beg->clone->set(second => 59);
+    }
+    elsif ($string =~ /^(\d+) hours? (?:hence|from\s+now)$/) {
+        $beg = $self->_now()->add(hours => $1)->set(minute=> 0, second => 0);
+        $end = $beg->clone->set(minute => 59, second => 59);
     }
     # The something of N month (ago|from now|hence)
     elsif ($string =~ /^(\d+(?:st|nd|rd|th)?|end) of (\d+) months? (ago|from now|hence)$/)
@@ -802,6 +826,23 @@ sub parse_range
             if ($string =~ /^(\d+)?(\w+)? hours? ago$/) {
                     $beg->set({minute => 0, second => 0});
                     @$incomplete = ('minute', 'second');
+            }
+            # from now pieces
+            if ($string =~ /^(\d+)?(\w+)? days? (?:hence|from\s+now)$/) {
+                    $beg->set({hour => 0, minute => 0, second => 0});
+                    @$incomplete = ('hour', 'minute', 'second');
+            }
+            if ($string =~ /^(\d+)?(\w+)? weeks? (?:hence|from\s+now)$/) {
+                    $beg->set({hour => 0, minute => 0, second => 0});
+                    @$incomplete = ('hour', 'minute', 'second');
+            }
+            if ($string =~ /^(\d+)?(\w+)? months? (?:hence|from\s+now)$/) {
+                    $beg->set({hour => 0, minute => 0, second => 0});
+                    @$incomplete = ('hour', 'minute', 'second');
+            }
+            if ($string =~ /^(\d+)?(\w+)? years? (?:hence|from\s+now)$/) {
+                    $beg->set({hour => 0, minute => 0, second => 0});
+                    @$incomplete = ('hour', 'minute', 'second');
             }
         }
         $end = $beg->clone;

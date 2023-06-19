@@ -677,6 +677,48 @@ my @tests = (
         as_of             => '2023-06-19 15:47:23',
         beg               => '09/19/2022 12:00:00AM',
         end               => '09/19/2022 11:59:59PM',
+    }, {
+        # N days from now
+        date_range_string => 'three days from now',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '06/22/2023 12:00:00AM',
+        end               => '06/22/2023 11:59:59PM',
+    }, {
+        # N weeks from now
+        date_range_string => 'three weeks from now',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '07/10/2023 12:00:00AM',
+        end               => '07/10/2023 11:59:59PM',
+    }, {
+        # N months from now
+        date_range_string => 'three months from now',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '09/19/2023 12:00:00AM',
+        end               => '09/19/2023 11:59:59PM',
+    }, {
+        # N years from now
+        date_range_string => 'three years from now',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '06/19/2026 12:00:00AM',
+        end               => '06/19/2026 11:59:59PM',
+    }, {
+        # N seconds from now
+        date_range_string => 'three seconds from now',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '06/19/2023 03:47:26PM',
+        end               => '06/19/2023 03:47:26PM',
+    }, {
+        # N minutes from now
+        date_range_string => 'three minutes from now',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '06/19/2023 03:50:00PM',
+        end               => '06/19/2023 03:50:59PM',
+    }, {
+        # N hours from now
+        date_range_string => 'three hours from now',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '06/19/2023 06:00:00PM',
+        end               => '06/19/2023 06:59:59PM',
     },
 );
 
