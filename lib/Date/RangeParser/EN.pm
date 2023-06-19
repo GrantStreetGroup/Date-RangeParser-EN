@@ -851,6 +851,32 @@ sub parse_range
             }
         }
         $end = $beg->clone;
+
+        # If we think that we got a complete date, and we assign both
+        # beginning and ending times.
+        if (!scalar @$incomplete) {
+            # past N bits
+            if (   !scalar @$incomplete
+                && $string =~ /^past (\d+)?(\w+)? (business day)(s?)$/) {
+                    my $dow = $self->_now()->day_of_week % 7;         # Monday == 1
+                    # If this is requested during the weekend, we don't have to add
+                    # another day. We actually want to go back that many days.
+                    # If we are are during a weekday, we are including today.
+                    if ($dow == 0 || $dow == 6) {
+                        $beg->set(%bod);
+                    } else {
+                        # Include today since we are on a weekday.
+                        $beg->set(%bod)->add(days => 1);
+                    }
+                    $end = $self->_now()->set(%eod);
+            }
+            if (   !scalar @$incomplete
+                && $string =~ /^past (\d+)?(\w+)? hours?$/) {
+                    $beg->set({minute => 0, second => 0});
+                    $end = $self->_now();
+            }
+        }
+
         # If Date::Manip had to supply defaults for some parts,
         # it gave the earliest possible datetime.
         # For the end of the range, we swap those defaults with

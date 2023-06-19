@@ -719,6 +719,42 @@ my @tests = (
         as_of             => '2023-06-19 15:47:23',
         beg               => '06/19/2023 06:00:00PM',
         end               => '06/19/2023 06:59:59PM',
+    }, {
+        # past N business days
+        date_range_string => 'past three business days',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '06/15/2023 12:00:00AM',
+        end               => '06/19/2023 11:59:59PM',
+    }, {
+        description       => 'Minutes Ago',
+        date_range_string => '2 minutes ago',
+        as_of             => '2023-06-06 07:23',
+        beg               => '06/06/2023 07:21AM',
+        end               => '06/06/2023 07:21AM',
+    }, {
+        description       => 'Past N minutes',
+        date_range_string => 'past 2 minutes',
+        as_of             => '2023-06-06 07:23',
+        beg               => '06/06/2023 07:21AM',
+        end               => '06/06/2023 07:23AM',
+    }, {
+        description       => 'Last N minutes',
+        date_range_string => 'last 2 minutes',
+        as_of             => '2023-06-06 07:23',
+        beg               => '06/06/2023 07:21AM',
+        end               => '06/06/2023 07:23AM',
+    }, {
+        description       => 'past N hours',
+        date_range_string => 'past two hours',
+        as_of             => '2023-06-06 07:23',
+        beg               => '06/06/2023 05:23AM',
+        end               => '06/06/2023 07:23AM',
+    }, {
+        description       => 'last N hours',
+        date_range_string => 'last two hours',
+        as_of             => '2023-06-06 07:23',
+        beg               => '06/06/2023 05:23AM',
+        end               => '06/06/2023 07:23AM',
     },
 );
 
