@@ -371,11 +371,7 @@ sub parse_range
     # Special cases, except in even more special cases
     unless ($string =~ /\d+ (quarter|day|week|month|year)/)
     {
-        if ($string =~ s/ ago$//)
-        {
-            $string = "past $string";
-        }
-        elsif ($string =~ s/ (?:hence|from\s+now)$//)
+        if ($string =~ s/ (?:hence|from\s+now)$//)
         {
             $string = "next $string";
         }
@@ -499,9 +495,9 @@ sub parse_range
                    ->subtract(months => (3 * $1) - 1)
                    ->subtract(days => 1)->add(seconds => 1);
      }
-    elsif ($string =~ /^(\d+) ((?:month|day|week|quarter)s?) ago$/)
+    elsif ($string =~ /^(\d+) ((?:month|day|week|year|quarter)s?) ago$/)
     {
-        # "N days|weeks|months ago"
+        # "N months|days|weeks|years|quarters ago"
         my $ct = $1 + 0;
         my $unit = $2;
         if($unit !~ /s$/) {
@@ -513,7 +509,15 @@ sub parse_range
         }
         $beg = $self->_bod()->subtract($unit => $ct);
         $end = $beg->clone->set(%eod);
-     }
+    }
+    elsif ($string =~ /^(\d+) ($weekday)s? ago$/) {
+        my $dow = $self->_now()->day_of_week % 7;          # Monday == 1
+        my $adjust = $weekday{$2} - $dow;
+        $adjust -= 7 if $adjust >=0;
+        $adjust -= 7*($1 - 1);
+        $beg = $self->_bod()->subtract(days => abs($adjust));
+        $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
+    }
     elsif ($string =~ /^past (\d+) ($weekday)s?$/)
     {
         # really "N weekdays ago", thanks to s/ago/.../ above
@@ -784,6 +788,22 @@ sub parse_range
         # been triggered. Generally speaking that means we have to deal with
         # when there is a time given in addition to a date.
 
+        # If we think that we got a complete datetime object but didn't
+        # and we know the beginning but the end depends on what is incomplete
+        if (!scalar @$incomplete) {
+            # past DateTimeSentence or DateTimeSentence ago.
+            if ($string =~ /^(\d+)?(\w+)? (business day)(s?) ago$/) {
+                    $beg->set(%bod);
+            }
+            if ($string =~ /^(\d+)?(\w+)? minutes? ago$/) {
+                    $beg->set({second => 0});
+                    @$incomplete = ('second');
+            }
+            if ($string =~ /^(\d+)?(\w+)? hours? ago$/) {
+                    $beg->set({minute => 0, second => 0});
+                    @$incomplete = ('minute', 'second');
+            }
+        }
         $end = $beg->clone;
         # If Date::Manip had to supply defaults for some parts,
         # it gave the earliest possible datetime.

@@ -641,6 +641,42 @@ my @tests = (
         as_of             => '2023-06-16 15:47:23',
         beg               => '06/16/2023 03:47:23PM',
         end               => '06/16/2023 03:47:24PM',
+    }, {
+        # N business days ago
+        date_range_string => 'three business days ago',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '06/14/2023 12:00:00AM',
+        end               => '06/14/2023 11:59:59PM',
+    }, {
+        # N minutes ago
+        date_range_string => 'three minutes ago',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '06/19/2023 03:44:00PM',
+        end               => '06/19/2023 03:44:59PM',
+    }, {
+        # N hours ago
+        date_range_string => 'three hours ago',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '06/19/2023 12:00:00PM',
+        end               => '06/19/2023 12:59:59PM',
+    }, {
+        # N weekdays ago
+        date_range_string => 'three tuesdays ago',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '05/30/2023 12:00:00AM',
+        end               => '05/30/2023 11:59:59PM',
+    }, {
+        # N years ago
+        date_range_string => 'three years ago',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '06/19/2020 12:00:00AM',
+        end               => '06/19/2020 11:59:59PM',
+    }, {
+        # N quarters ago
+        date_range_string => 'three quarters ago',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '09/19/2022 12:00:00AM',
+        end               => '09/19/2022 11:59:59PM',
     },
 );
 
