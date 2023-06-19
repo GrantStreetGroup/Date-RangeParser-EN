@@ -507,8 +507,8 @@ my @tests = (
         # this isn't really a range, but that's expected
         date_range_string => 'after after today - before before today',
         as_of             => '2000-01-01',
-        beg               => 'inf',
-        end               => '-inf',
+        beg               => '-inf',
+        end               => 'inf',
     }, {
         # ISO format without the seconds
         date_range_string => '2023-06-16 15:47:12 - 2023-06-24 12:23:45',

@@ -755,6 +755,11 @@ sub parse_range
         my ($first, $second) = split /\s+(?:to|thru|through|-)\s+/, $string, 2;
         ($beg) = $self->parse_range($first);
         (undef, $end) = $self->parse_range($second);
+        # If the date range was backwards, we flip the definition
+        if ($end < $beg) {
+            ($beg) = $self->parse_range($second);
+            (undef, $end) = $self->parse_range($first);
+        }
     }
 
     elsif ($string =~ /^<=/) {
