@@ -761,6 +761,18 @@ my @tests = (
         as_of             => '2023-06-06 07:23:00',
         beg               => '05/02/2023 12:00:00AM',
         end               => '05/16/2023 11:59:59PM',
+    }, {
+        description       => 'next 3 tuesdays',
+        date_range_string => 'next 3 tuesdays',
+        as_of             => '2023-06-06 07:23:00',
+        beg               => '06/13/2023 12:00:00AM',
+        end               => '06/27/2023 11:59:59PM',
+    }, {
+        description       => 'next 3 tuesdays',
+        date_range_string => 'next 3 tuesdays',
+        as_of             => '2023-06-07 07:23:00',
+        beg               => '06/13/2023 12:00:00AM',
+        end               => '06/27/2023 11:59:59PM',
     },
 );
 

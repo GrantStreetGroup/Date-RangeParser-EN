@@ -25,10 +25,10 @@ Parses plain-English strings representing date/time ranges
 
 =cut
 
-my %bod = (hour =>  0, minute =>  0, second =>  0);
-my %eod = (hour => 23, minute => 59, second => 59);
-my %boy = (month => 1, day => 1, %bod);
-my %eoy = (month => 12, day=> 31, %eod);
+my %BOD = (hour =>  0, minute =>  0, second =>  0);
+my %EOD = (hour => 23, minute => 59, second => 59);
+my %BOY = (month => 1, day => 1, %BOD);
+my %EOY = (month => 12, day=> 31, %EOD);
 
 my %weekday = (
     sunday    => 0,
@@ -398,19 +398,19 @@ sub parse_range
     {
         $beg = $self->_bod()->set_day(1);
         $end = $self->_datetime_class()->last_day_of_month(year => $self->_now()->year,
-                                           month => $self->_now()->month, %eod);
+                                           month => $self->_now()->month, %EOD);
     }
     elsif ($string =~ /^(?:this|current) quarter$/)
     {
         my $zq = int(($self->_now()->month - 1) / 3);     # 0..3
         $beg = $self->_bod()->set_month($zq * 3 + 1)->set_day(1);
         $end = $self->_datetime_class()->last_day_of_month(year => $self->_now()->year,
-                                           month => $zq * 3 + 3 , %eod);
+                                           month => $zq * 3 + 3 , %EOD);
     }
     elsif ($string =~ /^(?:this|current) year$/)
     {
-        $beg = $self->_datetime_class()->new(year => $self->_now()->year, %boy);
-        $end = $self->_datetime_class()->new(year => $self->_now()->year, %eoy);
+        $beg = $self->_datetime_class()->new(year => $self->_now()->year, %BOY);
+        $end = $self->_datetime_class()->new(year => $self->_now()->year, %EOY);
     }
     elsif ($string =~ /^this ($weekday)$/)
     {
@@ -470,7 +470,7 @@ sub parse_range
     {
         $beg = $self->_bod()->set_day(1)->subtract(months => $1 - 1);
         $end = $self->_datetime_class()->last_day_of_month(year => $self->_now()->year,
-                                       month => $self->_now()->month, %eod);
+                                       month => $self->_now()->month, %EOD);
     }
     elsif ($string =~ /^(?:last|past) (\d+) years?$/)
     {
@@ -499,7 +499,7 @@ sub parse_range
             $ct *= 3;
         }
         $beg = $self->_bod()->subtract($unit => $ct);
-        $end = $beg->clone->set(%eod);
+        $end = $beg->clone->set(%EOD);
     }
     elsif ($string =~ /^(\d+) ($weekday)s? ago$/) {
         my $dow = $self->_now()->day_of_week % 7;          # Monday == 1
@@ -519,6 +519,16 @@ sub parse_range
         $beg = $self->_bod()->add(days => $adjust);
         $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
     }
+    elsif ($string =~ /^next (\d+)?\s*($weekday)s?$/)
+    {
+        my $c = defined $1 ? $1 : 1;
+        my $dow = $self->_now()->day_of_week % 7;        # Monday == 1
+        my $adjust = $weekday{$2} - $dow;        # get to right day of week
+        $adjust += 7 if $adjust <= 0;            # add 7 days if its today or in the past
+        $beg = $self->_bod()->add(days => $adjust);
+        $adjust += 7*($c - 1);
+        $end = $beg->clone->add(days => 7*$c - 6)->subtract(seconds => 1);
+    }
     elsif ($string =~ /^(?:last|past) (\d+) ($weekday)s?$/)
     {
         my $c = defined $1 ? $1 : 1;
@@ -533,7 +543,7 @@ sub parse_range
     elsif ($string =~ /^yesterday$/)
     {
         $beg = $self->_bod()->subtract("days" => 1);
-        $end = $beg->clone->set(%eod);
+        $end = $beg->clone->set(%EOD);
     }
     elsif ($string =~ /^(?:last|previous) week$/)
     {
@@ -618,7 +628,7 @@ sub parse_range
         my $c = defined $1 ? $1 : 1;
         $beg = $self->_bod()->add(months => 1, end_of_month => 'preserve')->set_day(1);
         my $em = $self->_now()->add(months => $c, end_of_month => 'preserve');
-        $end = $self->_datetime_class()->last_day_of_month(year => $em->year, month => $em->month, %eod);
+        $end = $self->_datetime_class()->last_day_of_month(year => $em->year, month => $em->month, %EOD);
     }
     elsif ($string =~ /^next (\d+)?\s*quarters?$/)
     {
@@ -730,7 +740,7 @@ sub parse_range
             }
         }
         $beg = $self->_bod()->set(year => $y, month => $m, day => 1);
-        $end = $self->_datetime_class()->last_day_of_month(year => $y, month => $m, %eod);
+        $end = $self->_datetime_class()->last_day_of_month(year => $y, month => $m, %EOD);
     }
 
     # Match a month with a 4-digit year
@@ -745,7 +755,7 @@ sub parse_range
             }
         }
         $beg = $self->_bod()->set(year => $y, month => $m, day => 1);
-        $end = $self->_datetime_class()->last_day_of_month(year => $y, month => $m, %eod);
+        $end = $self->_datetime_class()->last_day_of_month(year => $y, month => $m, %EOD);
     }
 
     # See if the date is a range between two other dates separated by
@@ -797,7 +807,7 @@ sub parse_range
         ($beg) = $self->parse_range($string);
         # Merriam-Webster defines since as "from a definite past time until now",
         # thus $end is the end of the day today and not infinity.
-        $end = $self->_now()->clone->set(%eod);
+        $end = $self->_now()->clone->set(%EOD);
     }
 
     # See if this is a range between two other dates separated by -
@@ -822,7 +832,7 @@ sub parse_range
         if (!scalar @$incomplete) {
             # past DateTimeSentence or DateTimeSentence ago.
             if ($string =~ /^(\d+)?(\w+)? (business day)(s?) ago$/) {
-                    $beg->set(%bod);
+                    $beg->set(%BOD);
             }
             if ($string =~ /^(\d+)?(\w+)? minutes? ago$/) {
                     $beg->set({second => 0});
@@ -863,12 +873,12 @@ sub parse_range
                     # another day. We actually want to go back that many days.
                     # If we are are during a weekday, we are including today.
                     if ($dow == 0 || $dow == 6) {
-                        $beg->set(%bod);
+                        $beg->set(%BOD);
                     } else {
                         # Include today since we are on a weekday.
-                        $beg->set(%bod)->add(days => 1);
+                        $beg->set(%BOD)->add(days => 1);
                     }
-                    $end = $self->_now()->set(%eod);
+                    $end = $self->_now()->set(%EOD);
             }
             if (   !scalar @$incomplete
                 && $string =~ /^past (\d+)?(\w+)? hours?$/) {
@@ -886,7 +896,7 @@ sub parse_range
                 $end->add(months => 1)->subtract(days => 1);
             }
             else{
-                $end->set($component => $eoy{$component});
+                $end->set($component => $EOY{$component});
             }
         }
 
@@ -896,7 +906,7 @@ sub parse_range
         if (  !scalar @$incomplete
            && $beg->hms eq "00:00:00"
            && $end->hms eq "00:00:00"  ) {
-            $end->set(%eod);
+            $end->set(%EOD);
         }
     }
 
@@ -911,13 +921,13 @@ sub parse_range
 sub _bod {
     my $self = shift;
     my $now = $self->_now();
-    return $now->set(%bod);
+    return $now->set(%BOD);
 }
 
 sub _eod {
     my $self = shift;
     my $now = $self->_now();
-    return $now->set(%eod);
+    return $now->set(%EOD);
 }
 
 sub _now {
