@@ -672,6 +672,12 @@ my @tests = (
         beg               => '06/19/2020 12:00:00AM',
         end               => '06/19/2020 11:59:59PM',
     }, {
+        # N days ago
+        date_range_string => 'three days ago',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '06/16/2023 12:00:00AM',
+        end               => '06/16/2023 11:59:59PM',
+    }, {
         # N quarters ago
         date_range_string => 'three quarters ago',
         as_of             => '2023-06-19 15:47:23',
@@ -681,44 +687,44 @@ my @tests = (
         # N days from now
         date_range_string => 'three days from now',
         as_of             => '2023-06-19 15:47:23',
-        beg               => '06/22/2023 12:00:00AM',
-        end               => '06/22/2023 11:59:59PM',
+        beg               => '06/19/2023 03:47:23PM',
+        end               => '06/22/2023 03:47:23PM',
     }, {
         # N weeks from now
         date_range_string => 'three weeks from now',
         as_of             => '2023-06-19 15:47:23',
-        beg               => '07/10/2023 12:00:00AM',
-        end               => '07/10/2023 11:59:59PM',
+        beg               => '06/19/2023 03:47:23PM',
+        end               => '07/10/2023 03:47:23PM',
     }, {
         # N months from now
         date_range_string => 'three months from now',
         as_of             => '2023-06-19 15:47:23',
-        beg               => '09/19/2023 12:00:00AM',
-        end               => '09/19/2023 11:59:59PM',
+        beg               => '06/19/2023 03:47:23PM',
+        end               => '09/19/2023 03:47:23PM',
     }, {
         # N years from now
         date_range_string => 'three years from now',
         as_of             => '2023-06-19 15:47:23',
-        beg               => '06/19/2026 12:00:00AM',
-        end               => '06/19/2026 11:59:59PM',
+        beg               => '06/19/2023 03:47:23PM',
+        end               => '06/19/2026 03:47:23PM',
     }, {
         # N seconds from now
         date_range_string => 'three seconds from now',
         as_of             => '2023-06-19 15:47:23',
-        beg               => '06/19/2023 03:47:26PM',
+        beg               => '06/19/2023 03:47:23PM',
         end               => '06/19/2023 03:47:26PM',
     }, {
         # N minutes from now
         date_range_string => 'three minutes from now',
         as_of             => '2023-06-19 15:47:23',
-        beg               => '06/19/2023 03:50:00PM',
-        end               => '06/19/2023 03:50:59PM',
+        beg               => '06/19/2023 03:47:23PM',
+        end               => '06/19/2023 03:50:23PM',
     }, {
         # N hours from now
         date_range_string => 'three hours from now',
         as_of             => '2023-06-19 15:47:23',
-        beg               => '06/19/2023 06:00:00PM',
-        end               => '06/19/2023 06:59:59PM',
+        beg               => '06/19/2023 03:47:23PM',
+        end               => '06/19/2023 06:47:23PM',
     }, {
         # past N business days
         date_range_string => 'past three business days',
