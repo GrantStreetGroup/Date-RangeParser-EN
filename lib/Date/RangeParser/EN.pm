@@ -780,6 +780,10 @@ sub parse_range
     elsif ($string =~ /\s(?:to|thru|through|-)\s/) 
     {
         my ($first, $second) = split /\s+(?:to|thru|through|-)\s+/, $string, 2;
+
+        $first =~ s/(\d{2})-(\d{2})-(\d{4})/$3-$1-$2/;
+        $second =~ s/(\d{2})-(\d{2})-(\d{4})/$3-$1-$2/;
+
         ($beg) = $self->parse_range($first);
         (undef, $end) = $self->parse_range($second);
         # If the date range was backwards, we flip the definition

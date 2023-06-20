@@ -779,6 +779,36 @@ my @tests = (
         as_of             => '2023-06-07 07:23:00',
         beg               => '06/13/2023 12:00:00AM',
         end               => '06/27/2023 11:59:59PM',
+    }, {
+        description       => 'mm-dd-yyyy',
+        date_range_string => '08-02-1985',
+        as_of             => '2023-06-07 07:23:00',
+        beg               => '08/02/1985 12:00:00AM',
+        end               => '08/02/1985 11:59:59PM',
+    }, {
+        description       => 'mm-dd-yyyy',
+        date_range_string => '08-25-1985',
+        as_of             => '2023-06-07 07:23:00',
+        beg               => '08/25/1985 12:00:00AM',
+        end               => '08/25/1985 11:59:59PM',
+    }, {
+        description       => 'mm-dd-yyyy - mm/dd/yyyy',
+        date_range_string => '01-01-2014 - 02/28/2016',
+        as_of             => '2023-06-07 07:23:00',
+        beg               => '01/01/2014 12:00:00AM',
+        end               => '02/28/2016 11:59:59PM',
+    }, {
+        description       => 'mm-dd-yyyy - mm-dd-yyyy',
+        date_range_string => '01-01-2014 - 02-28-2016',
+        as_of             => '2023-06-07 07:23:00',
+        beg               => '01/01/2014 12:00:00AM',
+        end               => '02/28/2016 11:59:59PM',
+    }, {
+        description       => 'mm/dd/yyyy - mm-dd-yyyy',
+        date_range_string => '01/01/2014 - 02-28-2016',
+        as_of             => '2023-06-07 07:23:00',
+        beg               => '01/01/2014 12:00:00AM',
+        end               => '02/28/2016 11:59:59PM',
     },
 );
 
