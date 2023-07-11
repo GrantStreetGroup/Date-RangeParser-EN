@@ -1036,6 +1036,8 @@ sub _parse_date_manip
 sub _convert_from_us_dashed {
     my ($self, $dashed_date) = @_;
 
+    $dashed_date =~ m/$US_FORMAT_WITH_DASHES/;
+
     my $year  = 2 == length($3) ? "20$3" : $3;
     my $month = 1 == length($1) ? "0$1"  : $1;
     my $day   = 1 == length($2) ? "0$2"  : $2;
