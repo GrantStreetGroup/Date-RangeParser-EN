@@ -510,7 +510,7 @@ sub parse_range
         $adjust -= 7 if $adjust >=0;
         $adjust -= 7*($1 - 1);
         $beg = $self->_bod()->subtract(days => abs($adjust));
-        $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
+        $end = $beg->clone->set(%EOD);
     }
     elsif ($string =~ /^(\d+) ($weekday)s? (?:hence|from\s+now)$/) {
         # That's both "next sunday" and "3 sundays from now"
@@ -520,7 +520,7 @@ sub parse_range
         $adjust += 7 if $adjust <= 0;            # add 7 days if its today or in the past
         $adjust += 7*($c - 1);
         $beg = $self->_bod()->add(days => $adjust);
-        $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
+        $end = $beg->clone->set(%EOD);
     }
     elsif ($string =~ /^(\d+)? weeks? (?:hence|from\s+now)$/) {
         $beg = $self->_now();
