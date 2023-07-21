@@ -434,27 +434,16 @@ sub parse_range
         $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
     }
     # "Last N things" and "Past N things"
-    elsif ($string =~ /^(?:last|past) (\d+)?\s?hours?$/)
+    elsif ($string =~ /^(?:last|past) (\d+)?\s?(hour|minute|second)s?$/)
     {
+        my $unit = $2;
+        my $offset = $1;
+        if($unit !~ /s$/) {
+            $unit .= 's';
+        }
         # The "+0" math avoids call-by-reference side effects
         $beg = $self->_now();
-        $beg->subtract(hours => $1 // 1 + 0);
-
-        $end = $self->_now();
-    }
-    elsif ($string =~ /^(?:last|past) (\d+)?\s?minutes?$/)
-    {
-        # The "+0" math avoids call-by-reference side effects
-        $beg = $self->_now();
-        $beg->subtract(minutes => $1 // 1 + 0);
-
-        $end = $self->_now();
-    }
-    elsif ($string =~ /^(?:last|past) (\d+)?\s?seconds?$/)
-    {
-        # The "+0" math avoids call-by-reference side effects
-        $beg = $self->_now();
-        $beg->subtract(seconds => $1 // 1 + 0);
+        $beg->subtract($unit => $offset // 1 + 0);
 
         $end = $self->_now();
     }
