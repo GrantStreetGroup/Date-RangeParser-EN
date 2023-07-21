@@ -642,11 +642,29 @@ my @tests = (
         beg               => '06/16/2023 03:47:23PM',
         end               => '06/16/2023 03:47:24PM',
     }, {
-        # N business days ago
+        # N business days ago from a Monday
         date_range_string => 'three business days ago',
         as_of             => '2023-06-19 15:47:23',
         beg               => '06/14/2023 12:00:00AM',
         end               => '06/14/2023 11:59:59PM',
+    }, {
+        # N business days ago from a Saturday
+        date_range_string => 'three business days ago',
+        as_of             => '2023-06-17 15:47:23',
+        beg               => '06/14/2023 12:00:00AM',
+        end               => '06/14/2023 11:59:59PM',
+    }, {
+        # N business days ago to M business days ago as of a Monday
+        date_range_string => 'three business days ago to two business days ago',
+        as_of             => '2023-06-19 15:47:23',
+        beg               => '06/14/2023 12:00:00AM',
+        end               => '06/15/2023 11:59:59PM',
+    }, {
+        # N business days ago to M business days ago as of a Saturday
+        date_range_string => 'three business days ago to two business days ago',
+        as_of             => '2023-06-17 15:47:23',
+        beg               => '06/14/2023 12:00:00AM',
+        end               => '06/15/2023 11:59:59PM',
     }, {
         # N minutes ago
         date_range_string => 'three minutes ago',
@@ -726,11 +744,29 @@ my @tests = (
         beg               => '06/19/2023 03:47:23PM',
         end               => '06/19/2023 06:47:23PM',
     }, {
-        # past N business days
+        # past N business days from a Monday
         date_range_string => 'past three business days',
         as_of             => '2023-06-19 15:47:23',
         beg               => '06/15/2023 12:00:00AM',
         end               => '06/19/2023 11:59:59PM',
+    },  {
+        # past N business days from a Friday
+        date_range_string => 'past three business days',
+        as_of             => '2023-06-16 15:47:23',
+        beg               => '06/14/2023 12:00:00AM',
+        end               => '06/16/2023 11:59:59PM',
+    }, {
+        # past N business days from a Saturday
+        date_range_string => 'past three business days',
+        as_of             => '2023-06-17 15:47:23',
+        beg               => '06/14/2023 12:00:00AM',
+        end               => '06/16/2023 11:59:59PM',
+    },  {
+        # past N business days from a Sunday
+        date_range_string => 'past three business days',
+        as_of             => '2023-06-18 15:47:23',
+        beg               => '06/14/2023 12:00:00AM',
+        end               => '06/16/2023 11:59:59PM',
     }, {
         description       => 'Minutes Ago',
         date_range_string => '2 minutes ago',

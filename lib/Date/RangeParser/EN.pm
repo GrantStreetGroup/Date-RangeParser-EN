@@ -489,7 +489,7 @@ sub parse_range
                    ->subtract(months => (3 * $1) - 1)
                    ->subtract(days => 1)->add(seconds => 1);
      }
-    elsif ($string =~ /^(\d+) ((?:month|day|week|year|quarter)s?) ago$/)
+    elsif ($string =~ /^(\d+) ((?:month|day|week|year|quarter|hour|minute|second)s?) ago$/)
     {
         # "N months|days|weeks|years|quarters ago"
         my $ct = $1 + 0;
@@ -501,8 +501,19 @@ sub parse_range
             $unit = 'months';
             $ct *= 3;
         }
-        $beg = $self->_bod()->subtract($unit => $ct);
-        $end = $beg->clone->set(%EOD);
+        if ($unit eq 'hours') {
+            $beg = $self->_now()->subtract($unit => $ct)->set(minute => 0, second => 0);
+            $end = $beg->clone()->set(minute => 59, second => 59);
+        } elsif($unit eq 'minutes') {
+            $beg = $self->_now()->subtract($unit => $ct)->set(second => 0);
+            $end = $beg->clone()->set(second => 59);
+        } elsif($unit eq 'seconds') {
+            $end = $self->_now();
+            $beg = $end->clone->subtract($unit => $ct);
+        } else {
+            $beg = $self->_bod()->subtract($unit => $ct);
+            $end = $beg->clone->set(%EOD);
+        }
     }
     elsif ($string =~ /^(\d+) ($weekday)s? ago$/) {
         my $dow = $self->_now()->day_of_week % 7;          # Monday == 1
@@ -522,12 +533,12 @@ sub parse_range
         $beg = $self->_bod()->add(days => $adjust);
         $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
     }
-    elsif ($string =~ /^(\d+)?(\w+)? weeks? (?:hence|from\s+now)$/) {
+    elsif ($string =~ /^(\d+)? weeks? (?:hence|from\s+now)$/) {
         $beg = $self->_now();
         $end = $beg->clone->add(weeks => $1);
     }
     # from now pieces
-    elsif ($string =~ /^(\d+)?(\w+)? days? (?:hence|from\s+now)$/) {
+    elsif ($string =~ /^(\d+)? days? (?:hence|from\s+now)$/) {
             $beg = $self->_now();
             $end = $beg->clone->add(days => $1);
     }
@@ -711,11 +722,11 @@ sub parse_range
         $beg = $self->_now();
         $end = $beg->clone->add(hours => $1);
     }
-    elsif ($string =~ /^(\d+)?(\w+)? months? (?:hence|from\s+now)$/) {
+    elsif ($string =~ /^(\d+)? months? (?:hence|from\s+now)$/) {
         $beg = $self->_now();
         $end = $beg->clone->add(months => $1);
     }
-    elsif ($string =~ /^(\d+)?(\w+)? years? (?:hence|from\s+now)$/) {
+    elsif ($string =~ /^(\d+)? years? (?:hence|from\s+now)$/) {
         $beg = $self->_now();
         $end = $beg->clone->add(years => $1);
     }
@@ -853,48 +864,34 @@ sub parse_range
         # been triggered. Generally speaking that means we have to deal with
         # when there is a time given in addition to a date.
 
-        # If we think that we got a complete datetime object but didn't
-        # and we know the beginning but the end depends on what is incomplete
+        # If we think that we got a complete datetime object but did not.
+        # Primarily, we need this to help us out with our business day logic.
         if (!scalar @$incomplete) {
-            # past DateTimeSentence or DateTimeSentence ago.
-            if ($string =~ /^(\d+)?(\w+)? (business day)(s?) ago$/) {
+            # business days ago
+            if ($string =~ /^(\d+)? (business day)(s?) ago$/) {
                     $beg->set(%BOD);
             }
-            if ($string =~ /^(\d+)?(\w+)? minutes? ago$/) {
-                    $beg->set({second => 0});
-                    @$incomplete = ('second');
-            }
-            if ($string =~ /^(\d+)?(\w+)? hours? ago$/) {
-                    $beg->set({minute => 0, second => 0});
-                    @$incomplete = ('minute', 'second');
-            }
-        }
-        $end = $beg->clone;
 
-        # If we think that we got a complete date, and we assign both
-        # beginning and ending times.
-        if (!scalar @$incomplete) {
-            # past N bits
-            if (   !scalar @$incomplete
-                && $string =~ /^past (\d+)?(\w+)? (business day)(s?)$/) {
-                    my $dow = $self->_now()->day_of_week % 7;         # Monday == 1
-                    # If this is requested during the weekend, we don't have to add
-                    # another day. We actually want to go back that many days.
-                    # If we are are during a weekday, we are including today.
-                    if ($dow == 0 || $dow == 6) {
-                        $beg->set(%BOD);
-                    } else {
-                        # Include today since we are on a weekday.
-                        $beg->set(%BOD)->add(days => 1);
-                    }
+            # past N business days
+            if ($string =~ /^past (\d+)? (business day)(s?)$/) {
+                my $dow = $self->_now()->day_of_week % 7;         # Monday == 1
+                # We deal with each day of the weekend separately from weekdays
+                if ($dow == 0) {
+                    # Sunday
+                    $beg->set(%BOD);
+                    $end = $self->_now()->set(%EOD)->subtract(days => 2);
+                } elsif($dow == 6) {
+                    # Saturday
+                    $beg->set(%BOD);
+                    $end = $self->_now()->set(%EOD)->subtract(days => 1);
+                } else {
+                    # Include today since we are on a weekday.
+                    $beg->set(%BOD)->add(days => 1);
                     $end = $self->_now()->set(%EOD);
-            }
-            if (   !scalar @$incomplete
-                && $string =~ /^past (\d+)?(\w+)? hours?$/) {
-                    $beg->set({minute => 0, second => 0});
-                    $end = $self->_now();
+                }
             }
         }
+        $end = $beg->clone unless $end;
 
         # If Date::Manip had to supply defaults for some parts,
         # it gave the earliest possible datetime.
