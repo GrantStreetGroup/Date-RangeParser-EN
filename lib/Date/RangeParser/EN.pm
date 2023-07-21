@@ -531,7 +531,7 @@ sub parse_range
             $beg = $self->_now();
             $end = $beg->clone->add(days => $1);
     }
-    elsif ($string =~ /^next (\d+)?\s*($weekday)s?$/)
+    elsif ($string =~ /^next (\d+)?\s?($weekday)s?$/)
     {
         my $c = defined $1 ? $1 : 1;
         my $dow = $self->_now()->day_of_week % 7;        # Monday == 1
@@ -604,45 +604,37 @@ sub parse_range
         $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
     }
     # "Next thing" and "Next N things"
-    elsif ($string =~ /^next (\d+)?\s*seconds?$/)
+    elsif ($string =~ /^next (\d+)?\s?(second|minute|hour)s?$/)
     {
         my $c = defined $1 ? $1 : 1;
+        my $unit = $2;
+        if($unit !~ /s$/) {
+            $unit .= 's';
+        }
         $beg = $self->_now();
-        $end = $beg->clone->add(seconds => $c);
+        $end = $beg->clone->add($unit => $c);
     }
-    elsif ($string =~ /^next (\d+)?\s*minutes?$/)
-    {
-        my $c = defined $1 ? $1 : 1;
-        $beg = $self->_now();
-        $end = $beg->clone->add(minutes => $c);
-    }
-    elsif ($string =~ /^next (\d+)?\s*hours?$/)
-    {
-        my $c = defined $1 ? $1 : 1;
-        $beg = $self->_now();
-        $end = $beg->clone->add(hours => $c);
-    }
-    elsif ($string =~ /^(?:next (\d+)?\s*days?|tomorrow)$/)
+    elsif ($string =~ /^(?:next (\d+)?\s?days?|tomorrow)$/)
     {
         my $c = defined $1 ? $1 : 1;
         $beg = $self->_bod()->add(days => 1);
         $end = $beg->clone->add(days => $c)->subtract(seconds => 1)
     }
-    elsif ($string =~ /^next (\d+)?\s*weeks?$/)
+    elsif ($string =~ /^next (\d+)?\s?weeks?$/)
     {
         my $c = defined $1 ? $1 : 1;
         my $dow = $self->_now()->day_of_week % 7;        # Monday == 1
         $beg = $self->_bod()->add(days => 7 - $dow);        # Add to Sunday
         $end = $self->_eod()->add(days => 6 + 7*$c - $dow); # Add N Saturdays following
     }
-    elsif ($string =~ /^next (\d+)?\s*months?$/)
+    elsif ($string =~ /^next (\d+)?\s?months?$/)
     {
         my $c = defined $1 ? $1 : 1;
         $beg = $self->_bod()->add(months => 1, end_of_month => 'preserve')->set_day(1);
         my $em = $self->_now()->add(months => $c, end_of_month => 'preserve');
         $end = $self->_datetime_class()->last_day_of_month(year => $em->year, month => $em->month, %EOD);
     }
-    elsif ($string =~ /^next (\d+)?\s*quarters?$/)
+    elsif ($string =~ /^next (\d+)?\s?quarters?$/)
     {
         my $c = defined $1 ? $1 : 1;
         my $zq = int(($self->_now()->month - 1) / 3);
@@ -652,7 +644,7 @@ sub parse_range
                     ->subtract(seconds => 1);
     }
     # Add support for N quarters from now
-    elsif ($string =~ /^(\d+)?\s*quarters? (?:hence|from\s+now)$/)
+    elsif ($string =~ /^(\d+)?\s?quarters? (?:hence|from\s+now)$/)
     {
         my $c = defined $1 ? $1 : 1;
         my $zq = int(($self->_now()->month - 1) / 3);
@@ -661,13 +653,13 @@ sub parse_range
         $end = $beg->clone ->add(months => 3, end_of_month => 'preserve')
                     ->subtract(seconds => 1);
     }
-    elsif ($string =~ /^next (\d+)?\s*years?$/)
+    elsif ($string =~ /^next (\d+)?\s?years?$/)
     {
         my $c = defined $1 ? $1 : 1;
         $beg = $self->_bod()->set_month(1)->set_day(1)->add(years => 1);
         $end = $self->_eod()->set_month(12)->set_day(31)->add(years => $c);
     }
-    elsif ($string =~ /^next (\d+)?\s*($weekday)s?$/)
+    elsif ($string =~ /^next (\d+)?\s?($weekday)s?$/)
     {
         # That's both "next sunday" and "3 sundays from now"
         my $c = defined $1 ? $1 : 1;
@@ -742,7 +734,7 @@ sub parse_range
         $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
     }
     # Handle rewriting things with months in them
-    elsif ($string =~ /^(this|last|next)?\s*($month_re)$/)
+    elsif ($string =~ /^(this|last|next)?\s?($month_re)$/)
     {
         my ($y, $m) = ($1, $2);
         if (defined $y and $y eq 'last') {
@@ -839,7 +831,7 @@ sub parse_range
     # See if this is a range between two other dates separated by -
     elsif ($string !~ /^\d+-\d+$/ and $string =~ /^[^-]+-[^-]+$/) 
     {
-        my ($first, $second) = split /\s*-\s*/, $string, 2;
+        my ($first, $second) = split /\s?-\s?/, $string, 2;
         ($beg) = $self->parse_range($first);
         (undef, $end) = $self->parse_range($second);
     }
