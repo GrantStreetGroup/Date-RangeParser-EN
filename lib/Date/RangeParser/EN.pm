@@ -853,12 +853,15 @@ sub parse_range
         # been triggered. Generally speaking that means we have to deal with
         # when there is a time given in addition to a date.
 
+        $end = $beg->clone;
+
         # If we think that we got a complete datetime object but did not.
         # Primarily, we need this to help us out with our business day logic.
         if (!scalar @$incomplete) {
             # business days ago
             if ($string =~ /^(\d+)? (business day)(s?) ago$/) {
                     $beg->set(%BOD);
+                    @$incomplete = ('minute', 'hour', 'second');
             }
 
             # past N business days
@@ -880,7 +883,6 @@ sub parse_range
                 }
             }
         }
-        $end = $beg->clone unless $end;
 
         # If Date::Manip had to supply defaults for some parts,
         # it gave the earliest possible datetime.
