@@ -899,6 +899,10 @@ sub parse_range
         # Dates in the MM/DD/YYYY format will have beginning and ending time
         # of midnight; however, we want them to be the entire day; so, we set
         # the end time to the end of the day.
+        #
+        # TODO: This does have the potential to trigger in cases where the user
+        # has specified midnight for both dates, but this is a fairly unlikely
+        # scenario; however, it is something that we should fix in the future.
         if (  !scalar @$incomplete
            && $beg->hms eq "00:00:00"
            && $end->hms eq "00:00:00"  ) {
