@@ -485,6 +485,59 @@ sub parse_range
                    ->subtract(months => (3 * $1) - 1)
                    ->subtract(days => 1)->add(seconds => 1);
      }
+    elsif ($string =~ /^(?:last|past) (\d+) ($weekday)s?$/)
+    {
+        my $c = defined $1 ? $1 : 1;
+        my $dow = $self->_now()->day_of_week % 7;          # Monday == 1
+        my $adjust = $weekday{$2} - $dow;
+        $adjust -= 7 if $adjust >=0;
+        $adjust -= 7*($1 - 1);
+        $end = $self->_eod()->subtract(days => abs($adjust));
+        $beg = $end->clone->subtract(days => 7*($c-1)+1)->add(seconds => 1);
+    }
+    # "Last thing" and "Previous thing"
+    elsif ($string =~ /^yesterday$/)
+    {
+        $beg = $self->_bod()->subtract("days" => 1);
+        $end = $beg->clone->set(%EOD);
+    }
+    elsif ($string =~ /^(?:last|previous) week$/)
+    {
+        my $dow = $self->_now()->day_of_week % 7;           # Monday == 1
+        $beg = $self->_bod()->subtract(days => 7 + $dow);   # Subtract to last Sunday
+        $end = $self->_eod()->subtract(days => 1 + $dow);   # Subtract to Saturday
+    }
+    elsif ($string =~ /^(?:last|previous) month$/)
+    {
+        $beg = $self->_bod()->set_day(1)->subtract(months => 1);
+        $end = $self->_bod()->set_day(1)->subtract(seconds => 1);
+    }
+    elsif ($string =~ /^(?:last|previous) quarter$/)
+    {
+        my $zq = int(($self->_now()->month - 1) / 3);
+        $beg = $self->_bod()->set_month($zq * 3 + 1)->set_day(1)->subtract(months => 3);
+        $end = $beg->clone->add(months => 3)->subtract(seconds => 1);
+    }
+    elsif ($string =~ /^(?:last|previous) year$/)
+    {
+        $beg = $self->_bod()->set_month(1)->set_day(1)->subtract(months => 12);
+        $end = $self->_bod()->set_month(1)->set_day(1)->subtract(seconds => 1);
+    }
+    elsif ($string =~ /^(?:last|previous) ($weekday)$/) {
+        my $dow = $self->_now()->day_of_week % 7;           # Monday == 1
+        my $adjust = $weekday{$1} - $dow - 7;
+        $beg = $self->_bod()->subtract(days => abs($adjust));
+        $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
+    }
+    # "Past weekday" and "This past weekday"
+    elsif ($string =~ /^(?:this )?past ($weekday)$/)
+    {
+        my $dow = $self->_now()->day_of_week % 7;           # Monday == 1
+        my $adjust = $weekday{$1} - $dow;
+        $adjust -= 7 if $adjust >= 0;
+        $beg = $self->_bod()->subtract(days => abs($adjust));
+        $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
+    }
     elsif ($string =~ /^(\d+) ((?:month|day|week|year|quarter|hour|minute|second)s?) ago$/)
     {
         # "N months|days|weeks|years|quarters ago"
@@ -547,59 +600,6 @@ sub parse_range
         $beg = $self->_bod()->add(days => $adjust);
         $adjust += 7*($c - 1);
         $end = $beg->clone->add(days => 7*$c - 6)->subtract(seconds => 1);
-    }
-    elsif ($string =~ /^(?:last|past) (\d+) ($weekday)s?$/)
-    {
-        my $c = defined $1 ? $1 : 1;
-        my $dow = $self->_now()->day_of_week % 7;          # Monday == 1
-        my $adjust = $weekday{$2} - $dow;
-        $adjust -= 7 if $adjust >=0;
-        $adjust -= 7*($1 - 1);
-        $end = $self->_eod()->subtract(days => abs($adjust));
-        $beg = $end->clone->subtract(days => 7*($c-1)+1)->add(seconds => 1);
-    }
-    # "Last thing" and "Previous thing"
-    elsif ($string =~ /^yesterday$/)
-    {
-        $beg = $self->_bod()->subtract("days" => 1);
-        $end = $beg->clone->set(%EOD);
-    }
-    elsif ($string =~ /^(?:last|previous) week$/)
-    {
-        my $dow = $self->_now()->day_of_week % 7;           # Monday == 1
-        $beg = $self->_bod()->subtract(days => 7 + $dow);   # Subtract to last Sunday
-        $end = $self->_eod()->subtract(days => 1 + $dow);   # Subtract to Saturday
-    }
-    elsif ($string =~ /^(?:last|previous) month$/)
-    {
-        $beg = $self->_bod()->set_day(1)->subtract(months => 1);
-        $end = $self->_bod()->set_day(1)->subtract(seconds => 1);
-    }
-    elsif ($string =~ /^(?:last|previous) quarter$/)
-    {
-        my $zq = int(($self->_now()->month - 1) / 3);
-        $beg = $self->_bod()->set_month($zq * 3 + 1)->set_day(1)->subtract(months => 3);
-        $end = $beg->clone->add(months => 3)->subtract(seconds => 1);
-    }
-    elsif ($string =~ /^(?:last|previous) year$/)
-    {
-        $beg = $self->_bod()->set_month(1)->set_day(1)->subtract(months => 12);
-        $end = $self->_bod()->set_month(1)->set_day(1)->subtract(seconds => 1);
-    }
-    elsif ($string =~ /^(?:last|previous) ($weekday)$/) {
-        my $dow = $self->_now()->day_of_week % 7;           # Monday == 1
-        my $adjust = $weekday{$1} - $dow - 7;
-        $beg = $self->_bod()->subtract(days => abs($adjust));
-        $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
-    }
-    # "Past weekday" and "This past weekday"
-    elsif ($string =~ /^(?:this )?past ($weekday)$/)
-    {
-        my $dow = $self->_now()->day_of_week % 7;           # Monday == 1
-        my $adjust = $weekday{$1} - $dow;
-        $adjust -= 7 if $adjust >= 0;
-        $beg = $self->_bod()->subtract(days => abs($adjust));
-        $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
     }
     # "Coming weekday" and "This coming weekday"
     elsif ($string =~ /^(?:this )?coming ($weekday)$/)
