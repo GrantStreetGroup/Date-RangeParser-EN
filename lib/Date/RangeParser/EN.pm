@@ -400,15 +400,19 @@ sub parse_range
     elsif ($string =~ /^(?:this|current) month$/)
     {
         $beg = $self->_bod()->set_day(1);
-        $end = $self->_datetime_class()->last_day_of_month(year => $self->_now()->year,
-                                           month => $self->_now()->month, %EOD);
+        $end = $self->_datetime_class()->last_day_of_month(
+            year => $self->_now()->year,
+            month => $self->_now()->month,
+            %EOD);
     }
     elsif ($string =~ /^(?:this|current) quarter$/)
     {
         my $zq = int(($self->_now()->month - 1) / 3);     # 0..3
         $beg = $self->_bod()->set_month($zq * 3 + 1)->set_day(1);
-        $end = $self->_datetime_class()->last_day_of_month(year => $self->_now()->year,
-                                           month => $zq * 3 + 3 , %EOD);
+        $end = $self->_datetime_class()->last_day_of_month(
+            year => $self->_now()->year,
+            month => $zq * 3 + 3 ,
+            %EOD);
     }
     elsif ($string =~ /^(?:this|current) year$/)
     {
@@ -468,8 +472,10 @@ sub parse_range
     elsif ($string =~ /^(?:last|past) (\d+) months?$/)
     {
         $beg = $self->_bod()->set_day(1)->subtract(months => $1 - 1);
-        $end = $self->_datetime_class()->last_day_of_month(year => $self->_now()->year,
-                                       month => $self->_now()->month, %EOD);
+        $end = $self->_datetime_class()->last_day_of_month(
+            year => $self->_now()->year,
+            month => $self->_now()->month,
+            %EOD);
     }
     elsif ($string =~ /^(?:last|past) (\d+) years?$/)
     {
@@ -588,8 +594,8 @@ sub parse_range
     }
     # from now pieces
     elsif ($string =~ /^(\d+)? days? (?:hence|from\s+now)$/) {
-            $beg = $self->_now();
-            $end = $beg->clone->add(days => $1);
+        $beg = $self->_now();
+        $end = $beg->clone->add(days => $1);
     }
     elsif ($string =~ /^next (\d+)?\s?($weekday)s?$/)
     {
@@ -859,8 +865,8 @@ sub parse_range
         if (!scalar @$incomplete) {
             # business days ago
             if ($string =~ /^(\d+)? (business day)(s?) ago$/) {
-                    $beg->set(%BOD);
-                    @$incomplete = ('minute', 'hour', 'second');
+                $beg->set(%BOD);
+                @$incomplete = ('minute', 'hour', 'second');
             }
 
             # past N business days
