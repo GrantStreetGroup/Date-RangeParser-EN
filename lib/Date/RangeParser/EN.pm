@@ -444,8 +444,15 @@ sub parse_range
         # The "+0" math avoids call-by-reference side effects
         $beg = $self->_now();
         $beg->subtract($unit => $offset // 1 + 0);
-
         $end = $self->_now();
+
+        if ($unit eq 'hours') {
+            $beg->set(minute => 0, second => 0);
+            $end->set(minute => 59, second => 59);
+        } elsif ($unit eq 'minutes') {
+            $beg->set(second => 0);
+            $end->set(second => 59);
+        }
     }
     elsif ($string =~ /^(?:last|past) (\d+) days?$/)
     {

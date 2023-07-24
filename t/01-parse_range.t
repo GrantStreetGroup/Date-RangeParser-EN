@@ -597,14 +597,14 @@ my @tests = (
         # past hour
         date_range_string => 'past hour',
         as_of             => '2023-06-16 15:47:23',
-        beg               => '06/16/2023 02:47:23PM',
-        end               => '06/16/2023 03:47:23PM',
+        beg               => '06/16/2023 02:00:00PM',
+        end               => '06/16/2023 03:59:59PM',
     }, {
         # past minute
         date_range_string => 'past minute',
         as_of             => '2023-06-16 15:47:23',
-        beg               => '06/16/2023 03:46:23PM',
-        end               => '06/16/2023 03:47:23PM',
+        beg               => '06/16/2023 03:46:00PM',
+        end               => '06/16/2023 03:47:59PM',
     }, {
         # past second
         date_range_string => 'past second',
@@ -778,25 +778,25 @@ my @tests = (
         date_range_string => 'past 2 minutes',
         as_of             => '2023-06-06 07:23:00',
         beg               => '06/06/2023 07:21:00AM',
-        end               => '06/06/2023 07:23:00AM',
+        end               => '06/06/2023 07:23:59AM',
     }, {
         description       => 'Last N minutes',
         date_range_string => 'last 2 minutes',
         as_of             => '2023-06-06 07:23:00',
         beg               => '06/06/2023 07:21:00AM',
-        end               => '06/06/2023 07:23:00AM',
+        end               => '06/06/2023 07:23:59AM',
     }, {
         description       => 'past N hours',
         date_range_string => 'past two hours',
         as_of             => '2023-06-06 07:23:00',
-        beg               => '06/06/2023 05:23:00AM',
-        end               => '06/06/2023 07:23:00AM',
+        beg               => '06/06/2023 05:00:00AM',
+        end               => '06/06/2023 07:59:59AM',
     }, {
         description       => 'last N hours',
         date_range_string => 'last two hours',
         as_of             => '2023-06-06 07:23:00',
-        beg               => '06/06/2023 05:23:00AM',
-        end               => '06/06/2023 07:23:00AM',
+        beg               => '06/06/2023 05:00:00AM',
+        end               => '06/06/2023 07:59:59AM',
     }, {
         description       => 'past 3 tuesdays',
         date_range_string => 'past 3 tuesdays',
