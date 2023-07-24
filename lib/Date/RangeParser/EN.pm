@@ -31,7 +31,7 @@ my %EOD = (hour => 23, minute => 59, second => 59);
 my %BOY = (month => 1, day => 1, %BOD);
 my %EOY = (month => 12, day=> 31, %EOD);
 
-my $US_FORMAT_WITH_DASHES = qr/^ ([01]?[0-9]) - ([0-3]?[0-9]) - ( (?:[12][0-9])? [0-9]{2} ) $/x;
+my $US_FORMAT_WITH_DASHES = qr/^ (0[1-9]|1[012]) - (0[1-9]|[12][0-9]|3[01]) - ( (?:[12][0-9])? [0-9]{2} ) $/x;
 
 my %weekday = (
     sunday    => 0,
