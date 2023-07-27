@@ -31,7 +31,7 @@ my %EOD = (hour => 23, minute => 59, second => 59);
 my %BOY = (month => 1, day => 1, %BOD);
 my %EOY = (month => 12, day=> 31, %EOD);
 
-my $US_FORMAT_WITH_DASHES = qr/^ (0[1-9]|1[012]) - (0[1-9]|[12][0-9]|3[01]) - ( (?:[12][0-9])? [0-9]{2} ) $/x;
+my $US_FORMAT_WITH_DASHES = qr/^ (0[1-9]|1[012]) - (0[1-9]|[12][0-9]|3[01]) - ( (?:[12][0-9]) [0-9]{2} ) $/x;
 
 my %weekday = (
     sunday    => 0,
@@ -371,6 +371,10 @@ sub parse_range
     # the following regex is anchored to the end of the string.
     $string =~ s/2nd$/second/;
 
+    # Sometimes we get a bare US style date, but the user has used dashes.
+    # Let's de-scramble that before moving on.
+    $string = $self->_convert_from_us_dashed($string);
+
     # "This thing" and "current thing"
     if ($string eq "today" || $string =~ /^(?:this|current) day$/)
     {
@@ -440,11 +444,9 @@ sub parse_range
     # "Last N things" and "Past N things"
     elsif ($string =~ /^(?:last|past) (\d+)?\s?(hour|minute|second)s?$/)
     {
-        my $unit = $2;
+        my $unit = $self->_clean_units($2);
         my $offset = $1;
-        if($unit !~ /s$/) {
-            $unit .= 's';
-        }
+
         # The "+0" math avoids call-by-reference side effects
         $beg = $self->_now();
         $beg->subtract($unit => $offset // 1 + 0);
@@ -548,10 +550,8 @@ sub parse_range
     {
         # "N months|days|weeks|years|quarters ago"
         my $ct = $1 + 0;
-        my $unit = $2;
-        if($unit !~ /s$/) {
-            $unit .= 's';
-        }
+        my $unit = $self->_clean_units($2);
+
         if($unit eq 'quarters') {
             $unit = 'months';
             $ct *= 3;
@@ -620,10 +620,8 @@ sub parse_range
     elsif ($string =~ /^next (\d+)?\s?(second|minute|hour)s?$/)
     {
         my $c = defined $1 ? $1 : 1;
-        my $unit = $2;
-        if($unit !~ /s$/) {
-            $unit .= 's';
-        }
+        my $unit = $self->_clean_units($2);
+
         $beg = $self->_now();
         $end = $beg->clone->add($unit => $c);
     }
@@ -789,18 +787,8 @@ sub parse_range
     {
         my ($first, $second) = split /\s+(?:to|thru|through|-|–|—)\s+/, $string, 2;
 
-        $first = $self->_convert_from_us_dashed($first)
-            if $first =~ /$US_FORMAT_WITH_DASHES/;
-        $second = $self->_convert_from_us_dashed($second)
-            if $second =~ /$US_FORMAT_WITH_DASHES/;
-
         ($beg) = $self->parse_range($first);
         (undef, $end) = $self->parse_range($second);
-        # If the date range was backwards, we flip the definition
-        if ($end < $beg) {
-            ($beg) = $self->parse_range($second);
-            (undef, $end) = $self->parse_range($first);
-        }
     }
 
     elsif ($string =~ /^<=/) {
@@ -863,29 +851,47 @@ sub parse_range
         # If we think that we got a complete datetime object but did not.
         # Primarily, we need this to help us out with our business day logic.
         if (!scalar @$incomplete) {
-            # business days ago
+            # business days ago is always one day long.
             if ($string =~ /^(\d+)? (business day)(s?) ago$/) {
                 $beg->set(%BOD);
-                @$incomplete = ('minute', 'hour', 'second');
+                $end = $beg->clone()->set(%EOD);
             }
 
             # past N business days
+            # generally includes today, unless it is being run on a weekend.
             if ($string =~ /^past (\d+)? (business day)(s?)$/) {
                 my $dow = $self->_now()->day_of_week % 7;         # Monday == 1
+
+                $beg->set(%BOD);
+                $end = $self->_now()->set(%EOD);
+
                 # We deal with each day of the weekend separately from weekdays
                 if ($dow == 0) {
                     # Sunday
-                    $beg->set(%BOD);
-                    $end = $self->_now()->set(%EOD)->subtract(days => 2);
+                    $end->subtract(days => 2);
                 } elsif($dow == 6) {
                     # Saturday
-                    $beg->set(%BOD);
-                    $end = $self->_now()->set(%EOD)->subtract(days => 1);
+                    $end->subtract(days => 1);
                 } else {
                     # Include today since we are on a weekday.
-                    $beg->set(%BOD)->add(days => 1);
-                    $end = $self->_now()->set(%EOD);
+                    # Date manip goes back one day too far.
+                    $beg->add(days => 1);
                 }
+            }
+
+            # Dates in the MM/DD/YYYY format will have beginning and ending
+            # time of midnight; however, we want them to be the entire day;
+            # so, we set the end time to the end of the day.
+            #
+            # However, the user can specify midnight, which looks just the
+            # same to us; so, we don't extend the range in those cases.
+            # 
+            # TODO: Handle other ways of specifying midnight or fix
+            # Date::Manip so that it doesn't return an empty incomplete array.
+            if (  $beg->hms eq "00:00:00"
+                && $end->hms eq "00:00:00"
+                && $string !~ /(midnight|00:00:00|12AM)/  ) {
+                    $end->set(%EOD);
             }
         }
 
@@ -909,11 +915,11 @@ sub parse_range
         # TODO: This does have the potential to trigger in cases where the user
         # has specified midnight for both dates, but this is a fairly unlikely
         # scenario; however, it is something that we should fix in the future.
-        if (  !scalar @$incomplete
-           && $beg->hms eq "00:00:00"
-           && $end->hms eq "00:00:00"  ) {
-            $end->set(%EOD);
-        }
+        # if (  !scalar @$incomplete
+        #    && $beg->hms eq "00:00:00"
+        #    && $end->hms eq "00:00:00"  ) {
+        #     $end->set(%EOD);
+        # }
     }
 
     else
@@ -1030,12 +1036,20 @@ sub _parse_date_manip
     return ($date, $incomplete);
 }
 
+=head2 _convert_from_us_dashed
+
+Converts a US date string in the format MM-DD-YYYY into a datetime object.
+
+=cut
+
 sub _convert_from_us_dashed {
     my ($self, $dashed_date) = @_;
 
-    $dashed_date =~ m/$US_FORMAT_WITH_DASHES/;
+    if ($dashed_date !~ m/$US_FORMAT_WITH_DASHES/) {
+        return $dashed_date;
+    }
 
-    my $year  = 2 == length($3) ? "20$3" : $3;
+    my $year = $3;
     my $month = 1 == length($1) ? "0$1"  : $1;
     my $day   = 1 == length($2) ? "0$2"  : $2;
 
@@ -1044,6 +1058,22 @@ sub _convert_from_us_dashed {
         month  => $month,
         day    => $day,
     )->ymd;
+}
+
+=head2 _clean_units
+
+Given a unit of measurement such as hours?, minutes?, seconds?, or days?, we will return a string of the form hours, minutes, seconds, or days.
+
+=cut
+
+sub _clean_units {
+    my ($self, $measure) = @_;
+
+    if($measure !~ /s$/) {
+        $measure .= 's';
+    }
+
+    return $measure;
 }
 
 =head1 TO DO

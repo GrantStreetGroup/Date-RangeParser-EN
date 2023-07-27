@@ -507,8 +507,8 @@ my @tests = (
         # this isn't really a range, but that's expected
         date_range_string => 'after after today - before before today',
         as_of             => '2000-01-01',
-        beg               => '-inf',
-        end               => 'inf',
+        beg               => 'inf',
+        end               => '-inf',
     }, {
         # ISO format without the seconds
         date_range_string => '2023-06-16 15:47:12 - 2023-06-24 12:23:45',
@@ -744,12 +744,18 @@ my @tests = (
         beg               => '06/19/2023 03:47:23PM',
         end               => '06/19/2023 06:47:23PM',
     }, {
+        # past Large business days
+        date_range_string => 'past ten business days',
+        as_of             => '2023-07-27 15:47:23',
+        beg               => '07/14/2023 12:00:00AM',
+        end               => '07/27/2023 11:59:59PM',
+    }, {
         # past N business days from a Monday
         date_range_string => 'past three business days',
         as_of             => '2023-06-19 15:47:23',
         beg               => '06/15/2023 12:00:00AM',
         end               => '06/19/2023 11:59:59PM',
-    },  {
+    }, {
         # past N business days from a Friday
         date_range_string => 'past three business days',
         as_of             => '2023-06-16 15:47:23',
@@ -845,6 +851,24 @@ my @tests = (
         as_of             => '2023-06-07 07:23:00',
         beg               => '01/01/2014 12:00:00AM',
         end               => '02/28/2016 11:59:59PM',
+    }, {
+        # Midnight
+        date_range_string => 'midnight August 4, 2023',
+        as_of             => '2023-06-07 07:23:00',
+        beg               => '08/04/2023 12:00:00AM',
+        end               => '08/04/2023 12:00:00AM',
+    }, {
+        # Midnight
+        date_range_string => '2023-07-27',
+        as_of             => '2023-07-27 07:23:00',
+        beg               => '07/27/2023 12:00:00AM',
+        end               => '07/27/2023 11:59:59PM',
+    }, {
+        # Midnight
+        date_range_string => '2023-07-27 - 2023-07-28',
+        as_of             => '2023-07-27 07:23:00',
+        beg               => '07/27/2023 12:00:00AM',
+        end               => '07/28/2023 11:59:59PM',
     },
 );
 
