@@ -901,7 +901,7 @@ sub parse_range
             # Date::Manip so that it doesn't return an empty incomplete array.
             if (  $beg->hms eq "00:00:00"
                 && $end->hms eq "00:00:00"
-                && $string !~ /(midnight|00:00:00|12AM)/  ) {
+                && $string !~ /(midnight|00:00:00|12(:?00)?AM)/  ) {
                     $end->set(%EOD);
             }
         }
@@ -918,19 +918,6 @@ sub parse_range
                 $end->set($component => $EOY{$component});
             }
         }
-
-        # Dates in the MM/DD/YYYY format will have beginning and ending time
-        # of midnight; however, we want them to be the entire day; so, we set
-        # the end time to the end of the day.
-        #
-        # TODO: This does have the potential to trigger in cases where the user
-        # has specified midnight for both dates, but this is a fairly unlikely
-        # scenario; however, it is something that we should fix in the future.
-        # if (  !scalar @$incomplete
-        #    && $beg->hms eq "00:00:00"
-        #    && $end->hms eq "00:00:00"  ) {
-        #     $end->set(%EOD);
-        # }
     }
 
     else
@@ -1137,11 +1124,13 @@ The CPAN distribution is maintained by Michael Aquilina (aquilina@cpan.org).
 
 Sterling Hanenkamp, for adding support for explicit date ranges, improved parsing, and improving the documentation.
 
-Sam Varshavchik, for for fixing a bug affecting the "[ordinal] of [last/next] month" syntax.
+Sam Varshavchik, for fixing a bug affecting the "[ordinal] of [last/next] month" syntax.
+
+Allan Noah and James Hammer, for adding support for times in addition to dates.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012-2014 Grant Street Group.
+Copyright (C) 2012-2023 Grant Street Group.
 
 This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
