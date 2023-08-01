@@ -339,7 +339,7 @@ this by setting the C<now_callback> option on the constructor.
 
 =back
 
-Returns two L<DateTime> objects, reprensenting the beginning and end of the range.
+Returns two L<DateTime> objects, representing the beginning and end of the range.
 
 =cut
 
@@ -375,8 +375,15 @@ sub parse_range
     # Let's de-scramble that before moving on.
     $string = $self->_convert_from_us_dashed($string);
 
+    if ($string =~ /\s(?:to|thru|through|-|–|—)\s/) 
+    {
+        my ($first, $second) = split /\s+(?:to|thru|through|-|–|—)\s+/, $string, 2;
+
+        ($beg) = $self->parse_range($first);
+        (undef, $end) = $self->parse_range($second);
+    }
     # "This thing" and "current thing"
-    if ($string eq "today" || $string =~ /^(?:this|current) day$/)
+    elsif ($string eq "today" || $string =~ /^(?:this|current) day$/)
     {
         $beg = $self->_bod();
         $end = $self->_eod();
@@ -546,7 +553,9 @@ sub parse_range
         $beg = $self->_bod()->subtract(days => abs($adjust));
         $end = $beg->clone->add(days => 1)->subtract(seconds => 1);
     }
-    elsif ($string =~ /^(\d+) ((?:month|day|week|year|quarter|hour|minute|second)s?) ago$/)
+
+    # Dates ago
+    elsif ($string =~ /^(\d+) ((?:month|day|week|year|quarter)s?) ago$/)
     {
         # "N months|days|weeks|years|quarters ago"
         my $ct = $1 + 0;
@@ -556,20 +565,30 @@ sub parse_range
             $unit = 'months';
             $ct *= 3;
         }
+
+        $beg = $self->_bod()->subtract($unit => $ct);
+        $end = $beg->clone->set(%EOD);
+    }
+
+    # Strictly time ago
+    elsif ($string =~ /^(\d+) ((?:hour|minute|second)s?) ago$/) {
+        my $ct = $1 + 0;
+        my $unit = $self->_clean_units($2);
+
+        $beg = $self->_now()->subtract($unit => $ct);
+
         if ($unit eq 'hours') {
-            $beg = $self->_now()->subtract($unit => $ct)->set(minute => 0, second => 0);
+            $beg->set(minute => 0, second => 0);
             $end = $beg->clone()->set(minute => 59, second => 59);
         } elsif($unit eq 'minutes') {
-            $beg = $self->_now()->subtract($unit => $ct)->set(second => 0);
+            $beg->set(second => 0);
             $end = $beg->clone()->set(second => 59);
         } elsif($unit eq 'seconds') {
             $end = $self->_now();
-            $beg = $end->clone->subtract($unit => $ct);
-        } else {
-            $beg = $self->_bod()->subtract($unit => $ct);
-            $end = $beg->clone->set(%EOD);
         }
     }
+
+    # N <Day of the week>s ago
     elsif ($string =~ /^(\d+) ($weekday)s? ago$/) {
         my $dow = $self->_now()->day_of_week % 7;          # Monday == 1
         my $adjust = $weekday{$2} - $dow;
@@ -578,6 +597,8 @@ sub parse_range
         $beg = $self->_bod()->subtract(days => abs($adjust));
         $end = $beg->clone->set(%EOD);
     }
+
+    # Hence from now portions
     elsif ($string =~ /^(\d+) ($weekday)s? (?:hence|from\s+now)$/) {
         # That's both "next sunday" and "3 sundays from now"
         my $c = defined $1 ? $1 : 1;
@@ -779,16 +800,6 @@ sub parse_range
         }
         $beg = $self->_bod()->set(year => $y, month => $m, day => 1);
         $end = $self->_datetime_class()->last_day_of_month(year => $y, month => $m, %EOD);
-    }
-
-    # See if the date is a range between two other dates separated by
-    # to,thru,through
-    elsif ($string =~ /\s(?:to|thru|through|-|–|—)\s/) 
-    {
-        my ($first, $second) = split /\s+(?:to|thru|through|-|–|—)\s+/, $string, 2;
-
-        ($beg) = $self->parse_range($first);
-        (undef, $end) = $self->parse_range($second);
     }
 
     elsif ($string =~ /^<=/) {
