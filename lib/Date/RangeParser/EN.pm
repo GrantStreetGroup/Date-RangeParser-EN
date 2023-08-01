@@ -1118,7 +1118,8 @@ L<DateTime>, L<Date::Manip>
 
 This module was authored by Grant Street Group (L<http://grantstreet.com>), who were kind enough to give it back to the Perl community.
 
-The CPAN distribution is maintained by Michael Aquilina (aquilina@cpan.org).
+The CPAN distribution is maintained by
+Grant Street Group <developers@grantstreet.com>.
 
 =head1 THANK YOU
 
