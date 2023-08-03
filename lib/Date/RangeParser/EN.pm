@@ -382,6 +382,15 @@ sub parse_range
         ($beg) = $self->parse_range($first);
         (undef, $end) = $self->parse_range($second);
     }
+
+    # See if this is a range between two other dates separated by -
+    elsif ($string !~ /^\d+-\d+$/ and $string =~ /^[^-]+-[^-]+$/) 
+    {
+        my ($first, $second) = split /\s?-\s?/, $string, 2;
+        ($beg) = $self->parse_range($first);
+        (undef, $end) = $self->parse_range($second);
+    }
+
     # "This thing" and "current thing"
     elsif ($string eq "today" || $string =~ /^(?:this|current) day$/)
     {
@@ -840,14 +849,6 @@ sub parse_range
         $end = $self->_now()->clone->set(%EOD);
     }
 
-    # See if this is a range between two other dates separated by -
-    elsif ($string !~ /^\d+-\d+$/ and $string =~ /^[^-]+-[^-]+$/) 
-    {
-        my ($first, $second) = split /\s?-\s?/, $string, 2;
-        ($beg) = $self->parse_range($first);
-        (undef, $end) = $self->parse_range($second);
-    }
-
     # If all else fails, see if Date::Manip can figure this out
     # If some component of the date or time is missing, Date::Manip
     # will default it, generally to 00.
@@ -871,21 +872,32 @@ sub parse_range
             # past N business days
             # generally includes today, unless it is being run on a weekend.
             if ($string =~ /^past (\d+)? (business day)(s?)$/) {
-                my $dow = $self->_now()->day_of_week % 7;         # Monday == 1
 
                 $beg->set(%BOD);
-                $end = $self->_now()->set(%EOD);
+                my $bdow = $beg->day_of_week % 7;         # Monday == 1
 
-                # We deal with each day of the weekend separately from weekdays
-                if ($dow == 0) {
+                $end = $self->_now()->set(%EOD);
+                my $edow = $end->day_of_week % 7;         # Monday == 1
+
+                # Back up if today is not a business day.
+                # But keep Date::Manip's starting date
+
+                if ($edow == 0) {
                     # Sunday
                     $end->subtract(days => 2);
-                } elsif($dow == 6) {
+                } elsif($edow == 6) {
                     # Saturday
                     $end->subtract(days => 1);
-                } else {
+                }
+
+                # We generally disagree with Date::Manip's starting date if
+                # today is a weekday, so potentially move the starting date forward.
+                # But, how far to move it depends on what day it is.
+                elsif ($bdow == 5) {
                     # Include today since we are on a weekday.
                     # Date manip goes back one day too far.
+                    $beg->add(days => 3);
+                } else {
                     $beg->add(days => 1);
                 }
             }
@@ -896,12 +908,12 @@ sub parse_range
             #
             # However, the user can specify midnight, which looks just the
             # same to us; so, we don't extend the range in those cases.
-            # 
+            #
             # TODO: Handle other ways of specifying midnight or fix
             # Date::Manip so that it doesn't return an empty incomplete array.
             if (  $beg->hms eq "00:00:00"
                 && $end->hms eq "00:00:00"
-                && $string !~ /(midnight|00:00:00|12(:?00)?AM)/  ) {
+                && $string !~ /(midnight|00:00:00|12(:00){0,2}AM)/  ) {
                     $end->set(%EOD);
             }
         }
@@ -1127,7 +1139,7 @@ Sterling Hanenkamp, for adding support for explicit date ranges, improved parsin
 
 Sam Varshavchik, for fixing a bug affecting the "[ordinal] of [last/next] month" syntax.
 
-Allan Noah and James Hammer, for adding support for times in addition to dates.
+Allan Noah and James Hammer, for adding support for times in addition to dates and various bug fixes.
 
 =head1 COPYRIGHT AND LICENSE
 

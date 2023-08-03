@@ -869,6 +869,18 @@ my @tests = (
         as_of             => '2023-07-27 07:23:00',
         beg               => '07/27/2023 12:00:00AM',
         end               => '07/28/2023 11:59:59PM',
+    }, {
+        # Midnight
+        date_range_string => 'past four business days',
+        as_of             => '2023-08-03 07:23:00',
+        beg               => '07/31/2023 12:00:00AM',
+        end               => '08/03/2023 11:59:59PM',
+    }, {
+        # Midnight
+        date_range_string => 'past four business days',
+        as_of             => '2023-08-04 07:23:00',
+        beg               => '08/01/2023 12:00:00AM',
+        end               => '08/04/2023 11:59:59PM',
     },
 );
 
