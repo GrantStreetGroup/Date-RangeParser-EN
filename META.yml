@@ -1,9 +1,9 @@
 --- #YAML:1.0
 name:               Date-RangeParser-EN
-version:            0.07
+version:            0.09
 abstract:           Parser for plain English date/time range strings
 author:
-    - Michael Aquilina <aquilina@cpan.org>
+    - Grant Street Group <http://grantstreet.com>
 license:            perl
 distribution_type:  module
 configure_requires:
