@@ -1,13 +1,15 @@
 package Date::RangeParser::EN;
 
+our $AUTHORITY = 'cpan:GSG';
+# ABSTRACT: Parse plain English date/time range strings
+# VERSION
+
 use strict;
 use warnings;
 use utf8;
 
 use Date::Manip;
 use DateTime;
-
-our $VERSION = '0.08';
 
 =head1 NAME
 
