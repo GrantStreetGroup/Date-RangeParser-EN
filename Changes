@@ -1,5 +1,10 @@
 Revision history for Perl extension Date::RangeParser::EN
 
+0.08  Wed May 07 09:55:24 2014
+    - Fix bug where "<= [element]" returned the same as "< [element]"
+    - Add support for comparison operators without a following space
+        * eg. ">[element]"
+
 0.07  Fri Apr 18 12:26:13 2014
     - Add support for infinite datetimes
     - Add support for parsing

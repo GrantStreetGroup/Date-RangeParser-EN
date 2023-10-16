@@ -401,10 +401,22 @@ my @tests = (
         beg               => '-inf',
         end               => '04/17/2014 11:59PM',
     }, {
+        # same as previous test, w/o a space after <
+        date_range_string => '<4/18/2014',
+        as_of             => '2010-01-28',
+        beg               => '-inf',
+        end               => '04/17/2014 11:59PM',
+    }, {
         date_range_string => '<= 12/25/2013',
         as_of             => '2014-04-18',
         beg               => '-inf',
-        end               => '12/25/2013 12:00AM',
+        end               => '12/25/2013 11:59PM',
+    }, {
+        # same as previous test, w/o a space after <=
+        date_range_string => '<=12/25/2013',
+        as_of             => '2014-04-18',
+        beg               => '-inf',
+        end               => '12/25/2013 11:59PM',
     }, {
         date_range_string => 'after 2/5/1990',
         as_of             => '2014-04-18',
@@ -416,7 +428,19 @@ my @tests = (
         beg               => '02/06/1990 12:00AM',
         end               => 'inf',
     }, {
+        # same as previous test, w/o a space after >
+        date_range_string => '>2/5/1990',
+        as_of             => '2010-01-28',
+        beg               => '02/06/1990 12:00AM',
+        end               => 'inf',
+    }, {
         date_range_string => '>= 07/04/2776',
+        as_of             => '1776-07-04',
+        beg               => '07/04/2776 12:00AM',
+        end               => 'inf',
+    }, {
+        # same as previous test, w/o a space after >=
+        date_range_string => '>=07/04/2776',
         as_of             => '1776-07-04',
         beg               => '07/04/2776 12:00AM',
         end               => 'inf',

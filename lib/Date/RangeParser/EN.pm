@@ -6,7 +6,7 @@ use warnings;
 use Date::Manip;
 use DateTime;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 =head1 NAME
 
@@ -668,8 +668,13 @@ sub parse_range
         (undef, $end) = $self->parse_range($second);
     }
 
-    elsif ($string =~ /^(?:before|<) /i) {
-        $string =~ s/^(?:before|<) //i;
+    elsif ($string =~ /^<=/) {
+        $string =~ s/^<=//;
+        $beg   = $self->_infinite_past_class->new();
+        (undef, $end) = $self->parse_range($string);
+    }
+    elsif ($string =~ /^(?:before |<)/i) {
+        $string =~ s/^(?:before |<)//i;
         ($end) = $self->parse_range($string);
 
         if ( defined $end ) {
@@ -677,25 +682,20 @@ sub parse_range
             $end = $end->subtract(seconds => 1);
         }
     }
-    elsif ($string =~ /^<= /) {
-        $string =~ s/^<= //;
-        $beg   = $self->_infinite_past_class->new();
-        ($end) = $self->parse_range($string);
-    }
 
-    elsif ($string =~ /^(?:after|>) /i) {
-        $string =~ s/^(?:after|>) //i;
+    elsif ($string =~ /^>=/) {
+        $string =~ s/^>=//;
+        ($beg) = $self->parse_range($string);
+        $end   = $self->_infinite_future_class->new();
+    }
+    elsif ($string =~ /^(?:after |>)/i) {
+        $string =~ s/^(?:after |>)//i;
         (undef, $beg) = $self->parse_range($string);
 
         if ( defined $beg ) {
             $beg = $beg->add(seconds => 1);
             $end = $self->_infinite_future_class->new();
         }
-    }
-    elsif ($string =~ /^>= /) {
-        $string =~ s/^>= //;
-        ($beg) = $self->parse_range($string);
-        $end   = $self->_infinite_future_class->new();
     }
 
     elsif ($string =~ /^since /i) {
