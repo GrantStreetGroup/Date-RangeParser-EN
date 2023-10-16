@@ -1,15 +1,12 @@
 requires 'strict';
 requires 'warnings';
-requires 'parent';
-requires 'Carp';
-
-requires 'Hash::Util::FieldHash';
-requires 'List::Util', '>= 1.43';
-requires 'Time::HiRes';
+requires 'utf8';
+requires 'Date::Manip';
+requires 'DateTime';
 
 on test => sub {
-    requires 'Test2::V0';
-    requires 'Test::Strict';
+    requires 'base';
+    requires 'Test::More';
 };
 
 on develop => sub {
