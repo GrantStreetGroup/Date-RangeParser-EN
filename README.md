@@ -4,7 +4,7 @@ Date::RangeParser::EN - Parse plain English date/time range strings
 
 # VERSION
 
-version v0.9.0
+version v0.8.1
 
 # SYNOPSIS
 
@@ -267,9 +267,10 @@ Copyright (C) 2012-2023 Grant Street Group.
 
 This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
-# AUTHOR
+# AUTHORS
 
-Grant Street Group <developers@grantstreet.com>
+- Grant Street Group <developers@grantstreet.com>
+- Michael Aquilina <aquilina@cpan.org>
 
 # COPYRIGHT AND LICENSE
 
