@@ -4,7 +4,7 @@ Date::RangeParser::EN - Parse plain English date/time range strings
 
 # VERSION
 
-version v0.8.1
+version v1.0.0
 
 # SYNOPSIS
 
