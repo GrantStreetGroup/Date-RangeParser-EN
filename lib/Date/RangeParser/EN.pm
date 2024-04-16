@@ -54,7 +54,7 @@ my %ordinal = (
     qr/\bseventh\b/         => "7th",  qr/\beighth\b/           => "8th",
     qr/\bninth\b/           => "9th",  qr/\btenth\b/            => "10th",
     qr/\beleventh\b/        => "11th", qr/\btwelfth\b/          => "12th",
-    qr/\bthirteenths\b/     => "13th", qr/\bfourteenth\b/       => "14th",
+    qr/\bthirteenth\b/      => "13th", qr/\bfourteenth\b/       => "14th",
     qr/\bfifteenth\b/       => "15th", qr/\bsixteenth\b/        => "16th",
     qr/\bseventeenth\b/     => "17th", qr/\beighteenth\b/       => "18th",
     qr/\bnineteenth\b/      => "19th", qr/\btwentieth\b/        => "20th",
