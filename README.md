@@ -4,7 +4,7 @@ Date::RangeParser::EN - Parse plain English date/time range strings
 
 # VERSION
 
-version v1.0.0
+version v1.0.1
 
 # SYNOPSIS
 
@@ -77,6 +77,7 @@ More formally, this will parse the following kinds of date strings:
     MONTH : a month name: January, Feburary, March, April, May, June, July August, 
             September, October, November, or Decmeber or any 3-letter abbreviation
     YEAR : a 4-digit year (2-digits will not work)
+    TIMES: January 1st, 2000 at 10:00am through January 1st, 2000 at 2:00pm
     RANGE : any date range that can be parsed by parse_range
     ELEMENT : any element of a date range that can be parsed by parse_range
 
@@ -126,6 +127,8 @@ More formally, this will parse the following kinds of date strings:
     this coming WEEKDAY               : the WEEKDAY that is in the week after this, midnight to midnight
     this coming Thursday
 
+    NUMBER Business days ago        : past number of business days relative to now until now
+
     NUMBER PERIOD hence               : now to a future date relative to now
     4 months hence
 
@@ -158,6 +161,9 @@ More formally, this will parse the following kinds of date strings:
     CARDINAL of NUMBER months hence   : the specified day of a following month, midnight to midnight
     22nd of 6 months hence
 
+    CARDINAL of TIME                  : the specific time of day which can be accompanied by a date
+    10:00am through 12:00pm             defaults to today if no date is given
+
     MONTH                             : the named month of the current year, 1st to last day
     August
 
@@ -187,6 +193,9 @@ More formally, this will parse the following kinds of date strings:
 
     RANGE-RANGE                       : the very start of the first range to the very end of the second
     10/10-10/20                         (ranges must not contain hyphens, "-")
+
+    American style dates              : Month / Day / Year
+    6/15/2000
 
     before ELEMENT                    : all dates before the very start of the date specified in the ELEMENT
          < ELEMENT
@@ -274,7 +283,7 @@ This library is free software; you can redistribute it and/or modify it under th
 
 # COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2012 - 2023 by Grant Street Group.
+This software is Copyright (c) 2012 - 2024 by Grant Street Group.
 
 This is free software, licensed under:
 
