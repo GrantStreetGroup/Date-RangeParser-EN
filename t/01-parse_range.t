@@ -889,7 +889,22 @@ my @tests = (
         as_of             => '2023-08-04 07:23:00',
         beg               => '08/04/2023 03:00:00PM',
         end               => '08/04/2023 04:00:59PM',
-    },
+    }, {
+        date_range_string => 'last weekday at 3:30pm to today at 3:29pm',
+        as_of             => '2024-04-29 07:23:00',
+        beg               => '04/26/2024 03:30:00PM',
+        end               => '04/29/2024 03:29:59PM',
+    }, {
+        date_range_string => 'past 3 weekday at 3:30pm to today at 3:29pm',
+        as_of             => '2024-04-29 07:23:00',
+        beg               => '04/24/2024 03:30:00PM',
+        end               => '04/29/2024 03:29:59PM',
+    }, {
+        date_range_string => 'last weekday',
+        as_of             => '2024-04-29 07:23:00',
+        beg               => '04/26/2024 12:00:00AM',
+        end               => '04/26/2024 11:59:59PM',
+    }
 );
 
 for my $test (@tests)
