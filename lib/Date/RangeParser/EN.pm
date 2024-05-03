@@ -236,7 +236,8 @@ More formally, this will parse the following kinds of date strings:
   this coming WEEKDAY               : the WEEKDAY that is in the week after this, midnight to midnight
   this coming Thursday
 
-  NUMBER Business days ago        : past number of business days relative to now until now
+  NUMBER Business days ago          : past number of business days relative to now until now
+
 
   NUMBER PERIOD hence               : now to a future date relative to now
   4 months hence
