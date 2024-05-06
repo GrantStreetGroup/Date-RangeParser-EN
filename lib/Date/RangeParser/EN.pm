@@ -11,6 +11,11 @@ use utf8;
 use Date::Manip;
 use DateTime;
 
+my $dm_backend = $Date::Manip::Backend || '';
+if ($Date::Manip::VERSION lt '6' or $dm_backend eq 'DM5') {
+    warnings::warnif 'deprecated', "Versions of Date::Manip prior to 6.0.0 and DM5 backend will be deprecated in future releases.";
+}
+
 =head1 NAME
 
 Date::RangeParser::EN - Parser for plain English date/time range strings
