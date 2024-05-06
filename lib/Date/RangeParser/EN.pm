@@ -878,7 +878,7 @@ sub parse_range
 
         my $interval = $1 || 1;
         $string =~ s/^(?:last|past)\s?(\d+)?\s?weekdays?/$interval business days ago/;
-        ($beg, my $incomplete) = $self->_parse_date_manip($string) unless $incomplete;
+        ($beg, $incomplete) = $self->_parse_date_manip($string) unless $incomplete;
 
         $end = $beg->clone;
 
