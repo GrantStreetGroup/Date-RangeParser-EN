@@ -895,7 +895,7 @@ my @tests = (
         beg               => '04/26/2024 03:30:00PM',
         end               => '04/29/2024 03:29:59PM',
     }, {
-        date_range_string => 'past 3 weekday at 3:30pm to today at 3:29pm',
+        date_range_string => 'past 3 weekdays at 3:30pm to today at 3:29pm',
         as_of             => '2024-04-29 07:23:00',
         beg               => '04/24/2024 03:30:00PM',
         end               => '04/29/2024 03:29:59PM',
