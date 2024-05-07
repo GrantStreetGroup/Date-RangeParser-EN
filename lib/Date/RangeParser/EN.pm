@@ -391,6 +391,12 @@ sub parse_range
     # the following regex is anchored to the end of the string.
     $string =~ s/2nd$/second/;
 
+    # Handle weekdays as we do business days
+    if ($string =~ /^(?:last|past)\s?(\d+)?\s?weekdays?/) {
+        my $interval = $1 || 1;
+        $string =~ s/^(?:last|past)\s?(\d+)?\s?weekdays?/$interval business days ago/;
+    }
+
     # Sometimes we get a bare US style date, but the user has used dashes.
     # Let's de-scramble that before moving on.
     $string = $self->_convert_from_us_dashed($string);
@@ -872,18 +878,11 @@ sub parse_range
     # If all else fails, see if Date::Manip can figure this out
     # If some component of the date or time is missing, Date::Manip
     # will default it, generally to 00.
-    elsif (
-        ($beg, my $incomplete) = $self->_parse_date_manip($string)
-        || $string =~ /^(?:last|past)\s?(\d+)?\s?weekdays?/
-    )
+    elsif (($beg, my $incomplete) = $self->_parse_date_manip($string))
     {
         # We have dropped into date manip because the previous cases have not
         # been triggered. Generally speaking that means we have to deal with
         # when there is a time given in addition to a date.
-
-        my $interval = $1 || 1;
-        $string =~ s/^(?:last|past)\s?(\d+)?\s?weekdays?/$interval business days ago/;
-        ($beg, $incomplete) = $self->_parse_date_manip($string) unless $incomplete;
 
         $end = $beg->clone;
 
