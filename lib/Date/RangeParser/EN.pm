@@ -11,6 +11,11 @@ use utf8;
 use Date::Manip;
 use DateTime;
 
+my $dm_backend = $Date::Manip::Backend || '';
+if ($Date::Manip::VERSION lt '6' or $dm_backend eq 'DM5') {
+    warnings::warnif 'deprecated', "Versions of Date::Manip prior to 6.0.0 and DM5 backend will be deprecated in future releases.";
+}
+
 =head1 NAME
 
 Date::RangeParser::EN - Parser for plain English date/time range strings
@@ -236,7 +241,11 @@ More formally, this will parse the following kinds of date strings:
   this coming WEEKDAY               : the WEEKDAY that is in the week after this, midnight to midnight
   this coming Thursday
 
-  NUMBER Business days ago        : past number of business days relative to now until now
+  NUMBER Business days ago          : past number of business days relative to now until now
+
+  NUMBER weekdays ago               : past number of weekdays relative to now until now
+
+  LAST or PAST NUMBER weekdays ago  : past number of weekdays relative to now until now
 
   NUMBER PERIOD hence               : now to a future date relative to now
   4 months hence
@@ -381,6 +390,12 @@ sub parse_range
     # the while loop above, because this function is recursive, and
     # the following regex is anchored to the end of the string.
     $string =~ s/2nd$/second/;
+
+    # Handle weekdays as we do business days
+    if ($string =~ /^(?:last|past)\s?(\d+)?\s?weekdays?/) {
+        my $interval = $1 || 1;
+        $string =~ s/^(?:last|past)\s?(\d+)?\s?weekdays?/$interval business days ago/;
+    }
 
     # Sometimes we get a bare US style date, but the user has used dashes.
     # Let's de-scramble that before moving on.
