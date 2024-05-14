@@ -4,7 +4,7 @@ Date::RangeParser::EN - Parse plain English date/time range strings
 
 # VERSION
 
-version v1.0.1
+version v1.1.0
 
 # SYNOPSIS
 
@@ -127,7 +127,11 @@ More formally, this will parse the following kinds of date strings:
     this coming WEEKDAY               : the WEEKDAY that is in the week after this, midnight to midnight
     this coming Thursday
 
-    NUMBER Business days ago        : past number of business days relative to now until now
+    NUMBER Business days ago          : past number of business days relative to now until now
+
+    NUMBER weekdays ago               : past number of weekdays relative to now until now
+
+    LAST or PAST NUMBER weekdays ago  : past number of weekdays relative to now until now
 
     NUMBER PERIOD hence               : now to a future date relative to now
     4 months hence
